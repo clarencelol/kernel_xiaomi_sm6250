@@ -360,8 +360,6 @@ static int drv2624_stop(struct drv2624_data *pDRV2624)
 	if (pDRV2624->mnVibratorPlaying == YES) {
 		if (pDRV2624->mbIRQUsed)
 			drv2624_disableIRQ(pDRV2624);
-		if (hrtimer_active(&pDRV2624->haptics_timer))
-			hrtimer_cancel(&pDRV2624->haptics_timer);
 		nResult = drv2624_set_go_bit(pDRV2624, STOP);
 		drv2624_set_stopflag(pDRV2624);
 	}
@@ -387,8 +385,6 @@ static int drv2624_stop(struct drv2624_data *pDRV2624)
 	if (pDRV2624->mnVibratorPlaying == YES) {
 		if (pDRV2624->mbIRQUsed)
 			drv2624_disableIRQ(pDRV2624);
-		if (hrtimer_active(&pDRV2624->haptics_timer))
-			hrtimer_cancel(&pDRV2624->haptics_timer);
 		nResult = drv2624_set_go_bit(pDRV2624, STOP);
 		drv2624_set_stopflag(pDRV2624);
 	}
@@ -398,39 +394,24 @@ static int drv2624_stop(struct drv2624_data *pDRV2624)
 }
 #endif
 
-#ifdef ANDROID_TIMED_OUTPUT
-static int vibrator_get_time(struct timed_output_dev *dev)
-{
-	struct drv2624_data *pDRV2624 =
-	    container_of(dev, struct drv2624_data, to_dev);
-	if (hrtimer_active(&pDRV2624->haptics_timer)) {
-		ktime_t r = hrtimer_get_remaining(&pDRV2624->haptics_timer);
-		return ktime_to_ms(r);
-	}
-	return 0;
-}
-
-static void vibrator_enable(struct timed_output_dev *dev, int value)
+static void drv2624_haptics_work(struct work_struct *work)
 {
 	int nResult = 0;
 	struct drv2624_data *pDRV2624 =
-	    container_of(dev, struct drv2624_data, to_dev);
-	dev_dbg(pDRV2624->dev, "%s, value=%d\n", __func__, value);
+	    container_of(work, struct drv2624_data, work);
+	const int state = pDRV2624->led_dev.brightness;
+	dev_dbg(pDRV2624->dev, "%s, state=%d\n", __func__, state);
 	mutex_lock(&pDRV2624->lock);
 	dev_dbg(pDRV2624->dev, "%s, afer mnWorkMode=0x%x\n", __func__,
 		pDRV2624->mnWorkMode);
 	drv2624_stop(pDRV2624);
-	if (value > 0) {
+	if (state != LED_OFF) {
 		nResult = drv2624_change_mode(pDRV2624, DRV2624_RTP_MODE);
 		if (nResult < 0)
 			goto end;
 		nResult = drv2624_set_go_bit(pDRV2624, GO);
 		if (nResult >= 0) {
-			value = (value > MAX_TIMEOUT) ? MAX_TIMEOUT : value;
-			hrtimer_start(&pDRV2624->haptics_timer,
-				      ns_to_ktime((u64) value *
-						  NSEC_PER_MSEC),
-				      HRTIMER_MODE_REL);
+			pDRV2624->mnWorkMode |= WORK_VIBRATOR;
 			pDRV2624->mnVibratorPlaying = YES;
 			if (pDRV2624->mbIRQUsed)
 				nResult = drv2624_enableIRQ(pDRV2624, YES);
@@ -439,14 +420,13 @@ static void vibrator_enable(struct timed_output_dev *dev, int value)
 end:	mutex_unlock(&pDRV2624->lock);
 }
 
-#endif /* ANDROID_TIMED_OUTPUT */
-static enum hrtimer_restart vibrator_timer_func(struct hrtimer *timer)
+static void vibrator_enable(struct led_classdev *led_cdev,
+			    enum led_brightness value)
 {
 	struct drv2624_data *pDRV2624 =
-	    container_of(timer, struct drv2624_data, haptics_timer);
-	dev_dbg(pDRV2624->dev, "%s\n", __func__);
-	schedule_work(&pDRV2624->vibrator_work);
-	return HRTIMER_NORESTART;
+	    container_of(led_cdev, struct drv2624_data, led_dev);
+	led_cdev->brightness = value;
+	schedule_work(&pDRV2624->work);
 }
 
 /**
@@ -494,17 +474,6 @@ static void vibrator_work_routine(struct work_struct *work)
 			dev_err(pDRV2624->dev, "%s: status error = %d\n",
 				__func__, status);
 			drv2624_set_stopflag(pDRV2624);
-		} else {
-			if (!hrtimer_active(&pDRV2624->haptics_timer)) {
-				dev_dbg(pDRV2624->dev,
-					"will check GO bit after %d ms\n",
-					GO_BIT_CHECK_INTERVAL);
-				hrtimer_start(&pDRV2624->haptics_timer,
-					      ns_to_ktime((u64)
-							  GO_BIT_CHECK_INTERVAL
-							  * NSEC_PER_MSEC),
-					      HRTIMER_MODE_REL);
-			}
 		}
 	}
 err:	mutex_unlock(&pDRV2624->lock);
@@ -917,8 +886,6 @@ static ssize_t drv2624_vibrator_store(struct device *dev,
 		return rc;
 	if (val == 0) {
 		nResult = drv2624_set_go_bit(pDRV2624, STOP);
-		if (hrtimer_active(&pDRV2624->haptics_timer))
-			hrtimer_cancel(&pDRV2624->haptics_timer);
 		goto end;
 	}
 	dev_info(pDRV2624->dev, "val = %d\n", val);
@@ -936,11 +903,6 @@ static ssize_t drv2624_vibrator_store(struct device *dev,
 	nResult = drv2624_set_go_bit(pDRV2624, GO);
 	if (nResult < 0)
 		goto end;
-	if (pDRV2624->play.length != 0) {
-		hrtimer_start(&pDRV2624->haptics_timer,
-			      ns_to_ktime((u64) val * NSEC_PER_MSEC),
-			      HRTIMER_MODE_REL);
-	}
 	pDRV2624->mnVibratorPlaying = YES;
 end:	return size;
 }
@@ -1563,20 +1525,9 @@ static int drv2624_haptics_upload_effect(struct input_dev *dev,
 	struct drv2624_constant_playinfo *play = &pDRV2624->play;
 	u16 data[CUSTOM_DATA_LEN];
 	int nResult = 0;
-	ktime_t rem;
-	s64 time_us;
 	uint time_ms = 0;
 	dev_err(pDRV2624->dev, "%s enter function \n", __func__);
 	mutex_lock(&pDRV2624->lock);
-	/* waiting last vibration to end */
-	if (hrtimer_active(&pDRV2624->haptics_timer)) {
-		rem = hrtimer_get_remaining(&pDRV2624->haptics_timer);
-		time_us = ktime_to_us(rem);
-		dev_info(pDRV2624->dev,
-			 "%s: waiting for playing finished: %lld us\n",
-			 __func__, time_us);
-		usleep_range(time_us, time_us + 100);
-	}
 	pDRV2624->mnEffectType = effect->type;
 	dev_err(pDRV2624->dev, "%s: mnEffectType: %d\n", __func__,
 		pDRV2624->mnEffectType);
@@ -1784,11 +1735,6 @@ static void haptics_playback_work_routine(struct work_struct *work)
 			pDRV2624->mnWorkMode);
 		break;
 	}
-	if (pDRV2624->play.length != 0) {
-		hrtimer_start(&pDRV2624->haptics_timer,
-			      ns_to_ktime((u64) pDRV2624->play.length *
-					  NSEC_PER_MSEC), HRTIMER_MODE_REL);
-	}
 end:	mutex_unlock(&pDRV2624->lock);
 exit: 	dev_dbg(pDRV2624->dev, "%s: exit\n", __func__);
 }
@@ -1809,8 +1755,6 @@ static int drv2624_haptics_playback(struct input_dev *dev, int effect_id,
 	if ((pDRV2624->mnEffectType == FF_CONSTANT)
 	    && (pDRV2624->mnWorkMode == DRV2624_RTP_MODE)) {
 		pDRV2624->mnWorkMode = DRV2624_RTP_MODE;
-		if (hrtimer_active(&pDRV2624->haptics_timer))
-			hrtimer_cancel(&pDRV2624->haptics_timer);
 		schedule_work(&pDRV2624->haptics_playback_work);
 	} else if ((pDRV2624->mnEffectType == FF_PERIODIC) &&
 		   (pDRV2624->mnWorkMode == DRV2624_RAM_MODE)) {
@@ -1883,20 +1827,19 @@ static int Haptics_init(struct drv2624_data *pDRV2624)
 {
 	int nResult = 0;
 
-#ifdef ANDROID_TIMED_OUTPUT
-	pDRV2624->to_dev.name = "vibrator";
-	pDRV2624->to_dev.get_time = vibrator_get_time;
-	pDRV2624->to_dev.enable = vibrator_enable;
-	nResult = timed_output_dev_register(&(pDRV2624->to_dev));
-	if (nResult < 0) {
+	pDRV2624->led_dev.name = "vibrator";
+	pDRV2624->led_dev.max_brightness = LED_FULL;
+	pDRV2624->led_dev.brightness_set = vibrator_enable;
+	nResult = led_classdev_register(pDRV2624->dev, &pDRV2624->led_dev);
+	if (nResult) {
 		dev_err(pDRV2624->dev,
-			"drv2624: fail to create timed output dev\n");
+			"drv2624: fail to create led classdev\n");
 		return nResult;
 	}
-#endif /* ANDROID_TIMED_OUTPUT */
 	nResult = misc_register(&drv2624_misc);
 	if (nResult) {
 		dev_err(pDRV2624->dev, "drv2624 misc fail: %d\n", nResult);
+		led_classdev_unregister(&pDRV2624->led_dev);
 		return nResult;
 	}
 	/*
@@ -1908,14 +1851,8 @@ static int Haptics_init(struct drv2624_data *pDRV2624)
 	   }
 	 */
 
-	hrtimer_init(&pDRV2624->haptics_timer, CLOCK_MONOTONIC,
-		     HRTIMER_MODE_REL);
-	pDRV2624->haptics_timer.function = vibrator_timer_func;
-#if 0
-	hrtimer_init(&pDRV2624->stop_timer, CLOCK_MONOTONIC, HRTIMER_MODE_REL);
-	pDRV2624->stop_timer.function = vibrator_rtp_stop_timer;
-#endif
 	INIT_WORK(&pDRV2624->vibrator_work, vibrator_work_routine);
+	INIT_WORK(&pDRV2624->work, drv2624_haptics_work);
 	INIT_WORK(&pDRV2624->upload_periodic_work,
 		  upload_periodic_work_routine);
 	INIT_WORK(&pDRV2624->haptics_playback_work,
@@ -2111,9 +2048,7 @@ static void drv2624_close(struct input_dev *input)
 	struct drv2624_data *pDRV2624 = input_get_drvdata(input);
 	dev_dbg(pDRV2624->dev, "%s\n", __func__);
 	mutex_lock(&pDRV2624->lock);
-	if (hrtimer_active(&pDRV2624->haptics_timer)
-	    || pDRV2624->mnVibratorPlaying)
-		drv2624_stop(pDRV2624);
+	drv2624_stop(pDRV2624);
 	mutex_unlock(&pDRV2624->lock);
 	return;
 }
@@ -2278,7 +2213,10 @@ static int drv2624_i2c_probe(struct i2c_client *client,
 			nResult);
 		goto destroy_ff;
 	}
-	Haptics_init(pDRV2624);
+	nResult = Haptics_init(pDRV2624);
+	if (nResult)
+		goto free_gpio;
+
 	g_DRV2624data = pDRV2624;
 	nResult = request_firmware_nowait(THIS_MODULE, FW_ACTION_HOTPLUG,
 					  "drv2624.bin", &(client->dev),
@@ -2342,11 +2280,16 @@ static int drv2624_i2c_remove(struct i2c_client *client)
 
 	//cancel_delayed_work_sync(&pDRV2624->cali_write_work);
 
+	cancel_work_sync(&pDRV2624->vibrator_work);
+	cancel_work_sync(&pDRV2624->work);
+
 	if (pDRV2624->msPlatData.mnGpioNRST)
 		gpio_free(pDRV2624->msPlatData.mnGpioNRST);
 	if (pDRV2624->msPlatData.mnGpioINT)
 		gpio_free(pDRV2624->msPlatData.mnGpioINT);
 	misc_deregister(&drv2624_misc);
+	led_classdev_unregister(&pDRV2624->led_dev);
+
 	input_ff_destroy(pDRV2624->input_dev);
 	mutex_destroy(&pDRV2624->lock);
 	mutex_destroy(&pDRV2624->dev_lock);
@@ -2364,11 +2307,12 @@ static int __maybe_unused drv2624_suspend(struct device *dev)
 {
 	struct drv2624_data *pDRV2624 = dev_get_drvdata(dev);
 	dev_dbg(pDRV2624->dev, "%s enter!\n", __func__);
+
+	cancel_work_sync(&pDRV2624->vibrator_work);
+	cancel_work_sync(&pDRV2624->work);
+
 	mutex_lock(&pDRV2624->lock);
-	if (hrtimer_active(&pDRV2624->haptics_timer)
-	    || pDRV2624->mnVibratorPlaying) {
-		drv2624_stop(pDRV2624);
-	}
+	drv2624_stop(pDRV2624);
 
 	/* set device to standby mode */
 	drv2624_set_bits(pDRV2624, DRV2624_REG_CONTROL1,

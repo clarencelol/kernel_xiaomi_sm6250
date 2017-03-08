@@ -36,14 +36,7 @@
 #include <linux/mutex.h>
 #include <linux/cdev.h>
 #include <linux/firmware.h>
-//#define ANDROID
-//#define ANDROID_TIMED_OUTPUT
-#ifdef ANDROID
-#include <../../../drivers/staging/android/timed_output.h>
-#include <linux/wakelock.h>
-#elif defined ANDROID_TIMED_OUTPUT
-#include "timed_output.h"
-#endif /*  */
+#include <linux/leds.h>
 
 #define HAPTICS_DEVICE_NAME "drv2624"
 #define NEED_RELOAD_FIRMWARE	0
@@ -301,7 +294,6 @@ struct drv2624_data {
 	volatile int mnVibratorPlaying;
 	volatile char mnWorkMode;
 	unsigned char mnCurrentReg;
-	struct hrtimer haptics_timer;
 	/** add count pEffDuration**/
 	int effects_count;
 	//u32 *pEffDuration;
@@ -317,10 +309,8 @@ struct drv2624_data {
 	struct drv2624_constant_playinfo play;
 	struct work_struct vibrator_work;
 
-#ifdef	ANDROID_TIMED_OUTPUT
-	struct timed_output_dev to_dev;
-
-#endif				/*  */
+	struct work_struct work;
+	struct led_classdev led_dev;
 	struct work_struct upload_periodic_work;
 	struct work_struct haptics_playback_work;
 	//struct workqueue_struct *cali_write_workqueue;
