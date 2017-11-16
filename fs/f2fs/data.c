@@ -3227,7 +3227,7 @@ next:
 			if (need_readd)
 				goto readd;
 		}
-		release_pages(pages, nr_pages, false);
+		release_pages(pages, nr_pages);
 		cond_resched();
 	}
 #ifdef CONFIG_F2FS_FS_COMPRESSION
