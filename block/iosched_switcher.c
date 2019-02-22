@@ -18,14 +18,14 @@
 #include <linux/elevator.h>
 #include <linux/fb.h>
 
-#define NOOP_IOSCHED "noop"
+#define ANXIETY_IOSCHED "anxiety"
 #define RESTORE_DELAY_MS (5000)
 
 struct req_queue_data {
 	struct list_head list;
 	struct request_queue *queue;
 	char prev_e[ELV_NAME_MAX];
-	bool using_noop;
+	bool using_anxiety;
 };
 
 static struct delayed_work restore_prev;
@@ -35,29 +35,29 @@ static struct req_queue_data req_queues = {
 	.list = LIST_HEAD_INIT(req_queues.list),
 };
 
-static void change_elevator(struct req_queue_data *r, bool use_noop)
+static void change_elevator(struct req_queue_data *r, bool use_anxiety)
 {
 	struct request_queue *q = r->queue;
 
-	if (r->using_noop == use_noop)
+	if (r-> using_anxiety == use_anxiety)
 		return;
 
-	r->using_noop = use_noop;
+	r->using_anxiety = use_anxiety;
 
-	if (use_noop) {
+	if (use_anxiety) {
 		strcpy(r->prev_e, q->elevator->type->elevator_name);
-		elevator_init(q, NOOP_IOSCHED);
+		elevator_init(q, ANXIETY_IOSCHED);
 	} else {
 		elevator_init(q, r->prev_e);
 	}
 }
 
-static void change_all_elevators(struct list_head *head, bool use_noop)
+static void change_all_elevators(struct list_head *head, bool use_anxiety)
 {
 	struct req_queue_data *r;
 
 	list_for_each_entry(r, head, list)
-		change_elevator(r, use_noop);
+		change_elevator(r, use_anxiety);
 }
 
 static int fb_notifier_callback(struct notifier_block *nb,
@@ -73,7 +73,7 @@ static int fb_notifier_callback(struct notifier_block *nb,
 	switch (*blank) {
 	case FB_BLANK_UNBLANK:
 		/*
-		 * Switch back from noop to the original iosched after a delay
+		 * Switch back from anxiety to the original iosched after a delay
 		 * when the screen is turned on.
 		 */
 		if (delayed_work_pending(&sleep_sched))
@@ -83,7 +83,7 @@ static int fb_notifier_callback(struct notifier_block *nb,
 		break;
 	default:
 		/*
-		 * Switch to noop when the screen turns off. Purposely block
+		 * Switch to anxiety when the screen turns off. Purposely block
 		 * the fb notifier chain call in case weird things can happen
 		 * when switching elevators while the screen is off.
 		 */
