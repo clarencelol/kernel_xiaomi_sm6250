@@ -588,12 +588,6 @@
 			size = <0 0x1000000>;
 		};
 
-		cdsp_sec_mem: cdsp_sec_regions@0x9f400000 {
-			compatible = "removed-dma-pool";
-			no-map;
-			reg = <0 0x9f400000 0 0x1e00000>;
-		};
-
 		secure_display_memory: secure_display_region {
 			compatible = "shared-dma-pool";
 			alloc-ranges = <0 0x00000000 0 0xffffffff>;
