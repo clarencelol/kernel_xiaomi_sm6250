@@ -1668,6 +1668,10 @@ static inline int pci_enable_wake(struct pci_dev *dev, pci_power_t state,
 static inline struct resource *pci_find_resource(struct pci_dev *dev,
 						 struct resource *res)
 { return NULL; }
+static inline int pci_request_region(struct pci_dev *pdev, int bar,
+				     const char *res_name)
+{ return -EIO; }
+static inline void pci_release_region(struct pci_dev *pdev, int bar) { }
 static inline int pci_request_regions(struct pci_dev *dev, const char *res_name)
 { return -EIO; }
 static inline void pci_release_regions(struct pci_dev *dev) { }
