@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2017, The Linux Foundation. All rights reserved.
+Copyright (c) 2017, 2020, The Linux Foundation. All rights reserved.
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License version 2 and
@@ -15,6 +15,8 @@ GNU General Public License for more details.
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include "audio_utils.h"
+
+spinlock_t enc_dec_lock;
 
 static int __init audio_native_init(void)
 {
@@ -40,6 +42,7 @@ static int __init audio_native_init(void)
 	g711alaw_in_init();
 	g711mlaw_in_init();
 	qcelp_in_init();
+	spin_lock_init(&enc_dec_lock);
 	return 0;
 }
 
