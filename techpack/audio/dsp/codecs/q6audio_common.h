@@ -1,4 +1,4 @@
-/* Copyright (c) 2012-2014, 2017 The Linux Foundation. All rights reserved.
+/* Copyright (c) 2012-2014, 2017, 2020 The Linux Foundation. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -18,7 +18,7 @@
 
 #include <dsp/apr_audio-v2.h>
 #include <dsp/q6asm-v2.h>
-
+extern spinlock_t enc_dec_lock;
 
 void q6_audio_cb(uint32_t opcode, uint32_t token,
 		uint32_t *payload, void *priv);
