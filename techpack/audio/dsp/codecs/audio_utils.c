@@ -1,4 +1,4 @@
-/* Copyright (c) 2010-2019, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2010-2020, The Linux Foundation. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -952,8 +952,11 @@ int audio_in_release(struct inode *inode, struct file *file)
 	audio_in_disable(audio);
 	q6asm_audio_client_free(audio->ac);
 	mutex_unlock(&audio->lock);
+	spin_lock(&enc_dec_lock);
 	kfree(audio->enc_cfg);
 	kfree(audio->codec_cfg);
 	kfree(audio);
+	file->private_data = NULL;
+	spin_unlock(&enc_dec_lock);
 	return 0;
 }

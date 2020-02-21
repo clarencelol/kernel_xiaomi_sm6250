@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, 2015-2017, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2012-2013, 2015-2017, 2020 The Linux Foundation. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -29,6 +29,11 @@ void q6asm_in_cb(uint32_t opcode, uint32_t token,
 	struct q6audio_in *audio = (struct q6audio_in *)priv;
 	unsigned long flags;
 
+	spin_lock(&enc_dec_lock);
+	if (audio == NULL) {
+		pr_err("%s: failed to get q6audio value\n", __func__);
+		goto error;
+	}
 	pr_debug("%s:session id %d: opcode[0x%x]\n", __func__,
 			audio->ac->session, opcode);
 
@@ -66,6 +71,8 @@ void q6asm_in_cb(uint32_t opcode, uint32_t token,
 		break;
 	}
 	spin_unlock_irqrestore(&audio->dsp_lock, flags);
+error:
+	spin_unlock(&enc_dec_lock);
 }
 
 void  audio_in_get_dsp_frames(void *priv,
