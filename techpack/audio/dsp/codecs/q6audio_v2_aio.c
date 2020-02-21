@@ -1,4 +1,4 @@
-/* Copyright (c) 2012-2019, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2012-2020, The Linux Foundation. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -52,9 +52,10 @@ void audio_aio_cb(uint32_t opcode, uint32_t token,
 	struct q6audio_aio *audio = (struct q6audio_aio *)priv;
 	union msm_audio_event_payload e_payload;
 
+	spin_lock(&enc_dec_lock);
 	if (audio == NULL) {
 		pr_err("%s: failed to get q6audio value\n", __func__);
-		return;
+		goto error;
 	}
 	switch (opcode) {
 	case ASM_DATA_EVENT_WRITE_DONE_V2:
@@ -120,6 +121,8 @@ void audio_aio_cb(uint32_t opcode, uint32_t token,
 	default:
 		break;
 	}
+error:
+	spin_unlock(&enc_dec_lock);
 }
 
 int extract_meta_out_info(struct q6audio_aio *audio,
