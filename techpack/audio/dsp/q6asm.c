@@ -1952,6 +1952,7 @@ static int32_t q6asm_callback(struct apr_client_data *data, void *priv)
 		data->token, data->payload_size, data->src_port,
 		data->dest_port);
 	if ((data->opcode != ASM_DATA_EVENT_RENDERED_EOS) &&
+	    (data->opcode != ASM_DATA_EVENT_RENDERED_EOS_V2) &&
 	    (data->opcode != ASM_DATA_EVENT_EOS) &&
 	    (data->opcode != ASM_SESSION_EVENTX_OVERFLOW) &&
 	    (data->opcode != ASM_SESSION_EVENT_RX_UNDERFLOW)) {
@@ -1978,6 +1979,7 @@ static int32_t q6asm_callback(struct apr_client_data *data, void *priv)
 		case ASM_SESSION_CMD_PAUSE:
 		case ASM_SESSION_CMD_SUSPEND:
 		case ASM_DATA_CMD_EOS:
+		case ASM_DATA_CMD_EOS_V2:
 		case ASM_STREAM_CMD_CLOSE:
 		case ASM_STREAM_CMD_FLUSH:
 		case ASM_SESSION_CMD_RUN_V2:
@@ -2324,6 +2326,7 @@ static int32_t q6asm_callback(struct apr_client_data *data, void *priv)
 	}
 	case ASM_DATA_EVENT_EOS:
 	case ASM_DATA_EVENT_RENDERED_EOS:
+	case ASM_DATA_EVENT_RENDERED_EOS_V2:
 		pr_debug("%s: EOS ACK received: rxed session %d opcode 0x%x token 0x%x src %d dest %d\n",
 				__func__, ac->session,
 				data->opcode, data->token,
@@ -10236,7 +10239,7 @@ static int __q6asm_cmd(struct audio_client *ac, int cmd, uint32_t stream_id)
 		break;
 	case CMD_EOS:
 		pr_debug("%s: CMD_EOS\n", __func__);
-		hdr.opcode = ASM_DATA_CMD_EOS;
+		hdr.opcode = ASM_DATA_CMD_EOS_V2;
 		atomic_set(&ac->cmd_state, 0);
 		state = &ac->cmd_state;
 		break;
@@ -10386,7 +10389,7 @@ static int __q6asm_cmd_nowait(struct audio_client *ac, int cmd,
 		break;
 	case CMD_EOS:
 		pr_debug("%s: CMD_EOS\n", __func__);
-		hdr.opcode = ASM_DATA_CMD_EOS;
+		hdr.opcode = ASM_DATA_CMD_EOS_V2;
 		break;
 	case CMD_CLOSE:
 		pr_debug("%s: CMD_CLOSE\n", __func__);
