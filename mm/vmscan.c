@@ -992,7 +992,7 @@ static unsigned long shrink_page_list(struct list_head *page_list,
 		struct address_space *mapping;
 		struct page *page;
 		int may_enter_fs;
-		enum page_references references = PAGEREF_RECLAIM;
+		enum page_references references = PAGEREF_RECLAIM_CLEAN;
 		bool dirty, writeback;
 
 		cond_resched();
@@ -1391,8 +1391,6 @@ unsigned long reclaim_clean_pages_from_list(struct zone *zone,
 		.gfp_mask = GFP_KERNEL,
 		.priority = DEF_PRIORITY,
 		.may_unmap = 1,
-		/* Doesn't allow to write out dirty page */
-		.may_writepage = 0,
 	};
 	struct page *page, *next;
 	struct reclaim_stat stat;
@@ -1423,62 +1421,6 @@ unsigned long reclaim_clean_pages_from_list(struct zone *zone,
 			    -stat.nr_lazyfree_fail);
 	return nr_reclaimed;
 }
-
-#ifdef CONFIG_PROCESS_RECLAIM
-static unsigned long shrink_page(struct page *page,
-					struct zone *zone,
-					struct scan_control *sc,
-					enum ttu_flags ttu_flags,
-					bool force_reclaim,
-					struct list_head *ret_pages)
-{
-	int reclaimed;
-	LIST_HEAD(page_list);
-
-	list_add(&page->lru, &page_list);
-
-	reclaimed = shrink_page_list(&page_list, zone->zone_pgdat, sc,
-				ttu_flags, NULL, force_reclaim);
-	if (!reclaimed)
-		list_splice(&page_list, ret_pages);
-
-	return reclaimed;
-}
-
-unsigned long reclaim_pages_from_list(struct list_head *page_list)
-{
-	struct scan_control sc = {
-		.gfp_mask = GFP_KERNEL,
-		.priority = DEF_PRIORITY,
-		.may_writepage = 1,
-		.may_unmap = 1,
-		.may_swap = 1,
-	};
-
-	LIST_HEAD(ret_pages);
-	struct page *page;
-	unsigned long nr_reclaimed = 0;
-
-	while (!list_empty(page_list)) {
-		page = lru_to_page(page_list);
-		list_del(&page->lru);
-
-		ClearPageActive(page);
-		nr_reclaimed += shrink_page(page, page_zone(page), &sc,
-			TTU_IGNORE_ACCESS, true, &ret_pages);
-	}
-
-	while (!list_empty(&ret_pages)) {
-		page = lru_to_page(&ret_pages);
-		list_del(&page->lru);
-		dec_node_page_state(page, NR_ISOLATED_ANON +
-				page_is_file_cache(page));
-		putback_lru_page(page);
-	}
-
-	return nr_reclaimed;
-}
-#endif
 
 /*
  * Attempt to remove the specified page from its LRU.  Only take this page
