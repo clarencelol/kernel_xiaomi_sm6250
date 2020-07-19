@@ -535,6 +535,8 @@ static void __init mm_init(void)
 	pti_init();
 }
 
+int fpsensor = 1;
+
 asmlinkage __visible void __init start_kernel(void)
 {
 	char *command_line;
@@ -568,6 +570,10 @@ asmlinkage __visible void __init start_kernel(void)
 	page_alloc_init();
 
 	pr_notice("Kernel command line: %s\n", boot_command_line);
+
+	if(!strstr(command_line, "androidboot.fpsensor=fpc"))
+		fpsensor = 2; //goodix fingerprint
+
 	/* parameters may set static keys */
 	jump_label_init();
 	parse_early_param();
