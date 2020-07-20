@@ -2137,6 +2137,7 @@ struct hdd_context {
 
 	qdf_workqueue_t *adapter_ops_wq;
 	struct hdd_adapter_ops_history adapter_ops_history;
+	bool ll_stats_per_chan_rx_tx_time;
 	bool is_dual_mac_cfg_updated;
 };
 
