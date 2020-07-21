@@ -471,6 +471,13 @@ exit:
 	return rc;
 }
 
+static bool lcd_reset_keep_high;
+void set_lcd_reset_gpio_keep_high(bool en)
+{
+	lcd_reset_keep_high = en;
+}
+EXPORT_SYMBOL(set_lcd_reset_gpio_keep_high);
+
 static int dsi_panel_power_off(struct dsi_panel *panel)
 {
 	int rc = 0;
@@ -479,7 +486,8 @@ static int dsi_panel_power_off(struct dsi_panel *panel)
 		gpio_set_value(panel->reset_config.disp_en_gpio, 0);
 
 	if (gpio_is_valid(panel->reset_config.reset_gpio))
-		gpio_set_value(panel->reset_config.reset_gpio, 0);
+		if (!lcd_reset_keep_high)
+			gpio_set_value(panel->reset_config.reset_gpio, 0);
 
 	if (gpio_is_valid(panel->reset_config.lcd_mode_sel_gpio))
 		gpio_set_value(panel->reset_config.lcd_mode_sel_gpio, 0);
