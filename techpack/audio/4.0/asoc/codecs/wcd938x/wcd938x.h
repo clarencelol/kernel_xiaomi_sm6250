@@ -11,18 +11,18 @@ enum {
 	WCD9385 = 5,
 };
 
-#ifdef CONFIG_SND_SOC_WCD938X
+#if IS_ENABLED(CONFIG_SND_SOC_WCD938X)
 extern int wcd938x_info_create_codec_entry(struct snd_info_entry *codec_root,
 				    struct snd_soc_codec *codec);
 extern int wcd938x_get_codec_variant(struct snd_soc_codec *codec);
 
 #else
-extern int wcd938x_info_create_codec_entry(struct snd_info_entry *codec_root,
+static inline int wcd938x_info_create_codec_entry(struct snd_info_entry *codec_root,
 				    struct snd_soc_codec *codec)
 {
 	return 0;
 }
-extern int wcd938x_get_codec_variant(struct snd_soc_codec *codec)
+static inline int wcd938x_get_codec_variant(struct snd_soc_codec *codec)
 {
 	return 0;
 }
