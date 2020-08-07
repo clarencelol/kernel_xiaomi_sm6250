@@ -26,6 +26,7 @@
  *******************************************************************
  */
 
+bool board_33w_supported = false;
 static char board_id_hwname[32] = {0};
 
 void board_id_get_hwname(char *str)
@@ -40,6 +41,15 @@ static int __init setup_board_id_hwname(char *str)
 {
 	strcpy(board_id_hwname, str);
 	pr_info("board_id_hwname : %s\n", board_id_hwname);
+
+	if (!strcmp(str, "excalibur") ||
+            !strcmp(str, "gram") ||
+            !strcmp(str, "joyeuse"))
+		board_33w_supported = true;
+
+	pr_info("board_33w_supported : %s\n",
+			board_33w_supported ? "true" : "false");
+
 	return 1;
 }
 __setup("androidboot.hwname=", setup_board_id_hwname);
