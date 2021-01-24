@@ -307,6 +307,7 @@ static struct platform_driver video_cc_atoll_driver = {
 	.driver = {
 		.name = "atoll-videocc",
 		.of_match_table = video_cc_atoll_match_table,
+                .probe_type = PROBE_FORCE_SYNCHRONOUS,
 	},
 };
 
