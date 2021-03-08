@@ -411,7 +411,7 @@ static inline long atomic64_dec_if_positive(atomic64_t *v)
 #define __LL_SC_CMPXCHG(op)	__LL_SC_CALL(__cmpxchg_case_##op)
 
 #define __CMPXCHG_CASE(w, sfx, name, sz, mb, cl...)			\
-static inline u##sz __cmpxchg_case_##name##sz(volatile void *ptr,	\
+static __always_inline u##sz __cmpxchg_case_##name##sz(volatile void *ptr,	\
 					      unsigned long old,	\
 					      u##sz new)		\
 {									\
@@ -455,7 +455,7 @@ __CMPXCHG_CASE(x,  ,  mb_, 64, al, "memory")
 #define __LL_SC_CMPXCHG_DBL(op)	__LL_SC_CALL(__cmpxchg_double##op)
 
 #define __CMPXCHG_DBL(name, mb)						\
-static inline long __cmpxchg_double##name(unsigned long old1,		\
+static __always_inline long __cmpxchg_double##name(unsigned long old1,		\
 					 unsigned long old2,		\
 					 unsigned long new1,		\
 					 unsigned long new2,		\
