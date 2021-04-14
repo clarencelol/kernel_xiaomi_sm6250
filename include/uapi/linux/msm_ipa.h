@@ -422,9 +422,15 @@ enum ipa_client_type {
 
 	IPA_CLIENT_ETHERNET2_PROD		= 112,
 	IPA_CLIENT_ETHERNET2_CONS		= 113,
+
+	IPA_CLIENT_APPS_WAN_LOW_LAT_DATA_PROD	= 120,
+	IPA_CLIENT_APPS_WAN_LOW_LAT_DATA_CONS	= 121,
+
+	IPA_CLIENT_Q6_DL_NLO_LL_DATA_PROD		= 122,
+	/* RESERVED CONS			= 123, */
 };
 
-#define IPA_CLIENT_MAX (IPA_CLIENT_ETHERNET2_CONS + 1)
+#define IPA_CLIENT_MAX (IPA_CLIENT_Q6_DL_NLO_LL_DATA_PROD + 1)
 
 #define IPA_CLIENT_WLAN2_PROD IPA_CLIENT_A5_WLAN_AMPDU_PROD
 #define IPA_CLIENT_Q6_DL_NLO_DATA_PROD IPA_CLIENT_Q6_DL_NLO_DATA_PROD
@@ -447,15 +453,20 @@ enum ipa_client_type {
 #define IPA_CLIENT_MHI_PRIME_DPL_PROD IPA_CLIENT_MHI_PRIME_DPL_PROD
 #define IPA_CLIENT_MHI_QDSS_CONS IPA_CLIENT_MHI_QDSS_CONS
 #define IPA_CLIENT_QDSS_PROD IPA_CLIENT_QDSS_PROD
+#define IPA_CLIENT_APPS_WAN_LOW_LAT_DATA_PROD IPA_CLIENT_APPS_WAN_LOW_LAT_DATA_PROD
+#define IPA_CLIENT_APPS_WAN_LOW_LAT_DATA_CONS IPA_CLIENT_APPS_WAN_LOW_LAT_DATA_CONS
+#define IPA_CLIENT_Q6_DL_NLO_LL_DATA_PROD IPA_CLIENT_Q6_DL_NLO_LL_DATA_PROD
 
 #define IPA_CLIENT_IS_APPS_CONS(client) \
 	((client) == IPA_CLIENT_APPS_LAN_CONS || \
 	(client) == IPA_CLIENT_APPS_WAN_CONS || \
-	(client) == IPA_CLIENT_APPS_WAN_COAL_CONS)
+	(client) == IPA_CLIENT_APPS_WAN_COAL_CONS || \
+	(client) == IPA_CLIENT_APPS_WAN_LOW_LAT_DATA_CONS)
 
 #define IPA_CLIENT_IS_APPS_PROD(client) \
 	((client) == IPA_CLIENT_APPS_LAN_PROD || \
-	(client) == IPA_CLIENT_APPS_WAN_PROD)
+	(client) == IPA_CLIENT_APPS_WAN_PROD || \
+	(client) == IPA_CLIENT_APPS_WAN_LOW_LAT_DATA_PROD)
 
 #define IPA_CLIENT_IS_USB_CONS(client) \
 	((client) == IPA_CLIENT_USB_CONS || \
@@ -497,6 +508,7 @@ enum ipa_client_type {
 	(client) == IPA_CLIENT_Q6_CMD_PROD || \
 	(client) == IPA_CLIENT_Q6_DECOMP_PROD || \
 	(client) == IPA_CLIENT_Q6_DECOMP2_PROD || \
+	(client) == IPA_CLIENT_Q6_DL_NLO_LL_DATA_PROD || \
 	(client) == IPA_CLIENT_Q6_DL_NLO_DATA_PROD || \
 	(client) == IPA_CLIENT_Q6_CV2X_PROD || \
 	(client) == IPA_CLIENT_Q6_AUDIO_DMA_MHI_PROD)
@@ -521,6 +533,7 @@ enum ipa_client_type {
 	(client) == IPA_CLIENT_Q6_WAN_PROD || \
 	(client) == IPA_CLIENT_Q6_CMD_PROD || \
 	(client) == IPA_CLIENT_Q6_DL_NLO_DATA_PROD || \
+	(client) == IPA_CLIENT_Q6_DL_NLO_LL_DATA_PROD || \
 	(client) == IPA_CLIENT_Q6_CV2X_PROD || \
 	(client) == IPA_CLIENT_Q6_AUDIO_DMA_MHI_PROD)
 
@@ -1129,6 +1142,8 @@ struct ipa_flt_rule {
  * flt rule.
  * @cnt_idx: if 0 means disable, otherwise use for index.
  * will be assigned by ipa driver.
+ * @close_aggr_irq_mod: close aggregation/coalescing and close GSI
+ * interrupt moderation
  */
 struct ipa_flt_rule_v2 {
 	uint8_t retain_hdr;
@@ -1146,6 +1161,7 @@ struct ipa_flt_rule_v2 {
 	uint8_t pdn_idx;
 	uint8_t enable_stats;
 	uint8_t cnt_idx;
+	uint8_t close_aggr_irq_mod;
 };
 
 /**
@@ -1245,6 +1261,8 @@ struct ipa_rt_rule {
  * rt rule.
  * @cnt_idx: if enable_stats is 1 and cnt_idx is 0, then cnt_idx
  * will be assigned by ipa driver.
+ * @close_aggr_irq_mod: close aggregation/coalescing and close GSI
+ * interrupt moderation
  */
 struct ipa_rt_rule_v2 {
 	enum ipa_client_type dst;
@@ -1257,6 +1275,7 @@ struct ipa_rt_rule_v2 {
 	uint8_t coalesce;
 	uint8_t enable_stats;
 	uint8_t cnt_idx;
+	uint8_t close_aggr_irq_mod;
 };
 
 /**

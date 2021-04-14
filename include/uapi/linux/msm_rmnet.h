@@ -59,6 +59,8 @@
 #define RMNET_IOCTL_DEREGISTER_DEV             0x0016   /* Dereg a net dev */
 #define RMNET_IOCTL_GET_SG_SUPPORT             0x0017   /* Query sg support*/
 #define RMNET_IOCTL_SET_OFFLOAD                0x0018   /* Set IPA offload */
+#define RMNET_IOCTL_GET_EPID_LL                0x0021   /* Get LL ep ID    */
+#define RMNET_IOCTL_GET_EP_PAIR_LL             0x0022   /* LL ep pair      */
 
 /* Return values for the RMNET_IOCTL_GET_SUPPORTED_FEATURES IOCTL */
 #define RMNET_IOCTL_FEAT_NOTIFY_MUX_CHANNEL              (1<<0)
