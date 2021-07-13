@@ -138,13 +138,13 @@ static int tas2562iv_put(struct snd_kcontrol *kcontrol,
 	int iv_enable = 0, n_result = 0;
 
 	if (codec == NULL) {
-		pr_err("%s:codec is NULL\n", __func__);
+		pr_debug("%s:codec is NULL\n", __func__);
 		return 0;
 	}
 
 	p_tas2562 = snd_soc_codec_get_drvdata(codec);
 	if (p_tas2562 == NULL) {
-		pr_err("%s:p_tas2562 is NULL\n", __func__);
+		pr_debug("%s:p_tas2562 is NULL\n", __func__);
 		return 0;
 	}
 
@@ -165,20 +165,20 @@ static int tas2562iv_get(struct snd_kcontrol *kcontrol,
 	int ret, value;
 
 	if (codec == NULL) {
-		pr_err("%s:codec is NULL\n", __func__);
+		pr_debug("%s:codec is NULL\n", __func__);
 		return 0;
 	}
 
 	p_tas2562 = snd_soc_codec_get_drvdata(codec);
 	if (p_tas2562 == NULL) {
-		pr_err("%s:p_tas2562 is NULL\n", __func__);
+		pr_debug("%s:p_tas2562 is NULL\n", __func__);
 		return 0;
 	}
 
 	ret = p_tas2562->read(p_tas2562, channel_left,
 			TAS2562_POWERCONTROL, &value);
 	if (ret < 0)
-		dev_err(p_tas2562->dev, "can't get ivsensor state %s, L=%d\n",
+		dev_dbg(p_tas2562->dev, "can't get ivsensor state %s, L=%d\n",
 			__func__, __LINE__);
 	else if (((value & TAS2562_POWERCONTROL_ISNSPOWER_MASK)
 			== TAS2562_POWERCONTROL_ISNSPOWER_ACTIVE)
@@ -190,7 +190,7 @@ static int tas2562iv_get(struct snd_kcontrol *kcontrol,
 	}
 
 	tas2562iv_enable = ucontrol->value.integer.value[0];
-	dev_info(p_tas2562->dev, "value: 0x%x, tas2562iv_enable %d\n",
+	dev_dbg(p_tas2562->dev, "value: 0x%x, tas2562iv_enable %d\n",
 			value, tas2562iv_enable);
 
 	return 0;
@@ -239,7 +239,7 @@ static int tas2562_i2c_load_data(struct tas2562_priv *p_tas2562,
 		} else {
 			if (n_register != 0xFFFFFFFF) {
 				if (n_size > 128) {
-					dev_err(p_tas2562->dev,
+					dev_dbg(p_tas2562->dev,
 					"%s, Line=%d, invalid size, maximum is 128 bytes!\n",
 					__func__, __LINE__);
 					break;
@@ -258,7 +258,7 @@ static int tas2562_i2c_load_data(struct tas2562_priv *p_tas2562,
 					if (n_result < 0)
 						break;
 				} else {
-					dev_err(p_tas2562->dev,
+					dev_dbg(p_tas2562->dev,
 						"%s, Line=%d,invalid size, minimum is 1 bytes!\n",
 						__func__, __LINE__);
 				}
@@ -306,7 +306,7 @@ static int tas2562_set_power_state(struct tas2562_priv *p_tas2562,
 
 	if ((p_tas2562->mb_mute) && (state == TAS2562_POWER_ACTIVE))
 		state = TAS2562_POWER_MUTE;
-	dev_info(p_tas2562->dev, "set power state: %d\n", state);
+	dev_dbg(p_tas2562->dev, "set power state: %d\n", state);
 
 	switch (state) {
 	case TAS2562_POWER_ACTIVE:
@@ -368,7 +368,7 @@ static int tas2562_set_power_state(struct tas2562_priv *p_tas2562,
 		break;
 
 	default:
-		dev_err(p_tas2562->dev, "wrong power state setting %d\n",
+		dev_dbg(p_tas2562->dev, "wrong power state setting %d\n",
 				state);
 	}
 
@@ -384,10 +384,10 @@ static int tas2562_dac_event(struct snd_soc_dapm_widget *w,
 
 	switch (event) {
 	case SND_SOC_DAPM_POST_PMU:
-		dev_info(p_tas2562->dev, "SND_SOC_DAPM_POST_PMU\n");
+		dev_dbg(p_tas2562->dev, "SND_SOC_DAPM_POST_PMU\n");
 		break;
 	case SND_SOC_DAPM_PRE_PMD:
-		dev_info(p_tas2562->dev, "SND_SOC_DAPM_PRE_PMD\n");
+		dev_dbg(p_tas2562->dev, "SND_SOC_DAPM_PRE_PMD\n");
 		break;
 
 	}
@@ -413,7 +413,7 @@ static int tas2562_get_left_speaker_switch(struct snd_kcontrol *pKcontrol,
 	struct snd_soc_codec *codec = snd_soc_kcontrol_codec(pKcontrol);
 	struct tas2562_priv *p_tas2562 = snd_soc_codec_get_drvdata(codec);
 
-	dev_info(p_tas2562->dev, "%s, p_u_control = %ld\n",
+	dev_dbg(p_tas2562->dev, "%s, p_u_control = %ld\n",
 			__func__, p_u_control->value.integer.value[0]);
 	p_u_control->value.integer.value[0] = p_tas2562->spk_l_control;
 	return 0;
@@ -425,7 +425,7 @@ static int tas2562_set_left_speaker_switch(struct snd_kcontrol *pKcontrol,
 	struct snd_soc_codec *codec = snd_soc_kcontrol_codec(pKcontrol);
 	struct tas2562_priv *p_tas2562 = snd_soc_codec_get_drvdata(codec);
 
-	dev_info(p_tas2562->dev, "%s, spk_l_control = %d\n",
+	dev_dbg(p_tas2562->dev, "%s, spk_l_control = %d\n",
 			__func__, p_tas2562->spk_l_control);
 	p_tas2562->spk_l_control = p_u_control->value.integer.value[0];
 	return 0;
@@ -437,7 +437,7 @@ static int tas2562_get_right_speaker_switch(struct snd_kcontrol *pKcontrol,
 	struct snd_soc_codec *codec = snd_soc_kcontrol_codec(pKcontrol);
 	struct tas2562_priv *p_tas2562 = snd_soc_codec_get_drvdata(codec);
 
-	dev_info(p_tas2562->dev, "%s, p_u_control = %ld\n",
+	dev_dbg(p_tas2562->dev, "%s, p_u_control = %ld\n",
 			__func__, p_u_control->value.integer.value[0]);
 	p_u_control->value.integer.value[0] = p_tas2562->spk_r_control;
 	return 0;
@@ -449,7 +449,7 @@ static int tas2562_set_right_speaker_switch(struct snd_kcontrol *pKcontrol,
 	struct snd_soc_codec *codec = snd_soc_kcontrol_codec(pKcontrol);
 	struct tas2562_priv *p_tas2562 = snd_soc_codec_get_drvdata(codec);
 
-	dev_info(p_tas2562->dev, "%s, spk_r_control = %d\n",
+	dev_dbg(p_tas2562->dev, "%s, spk_r_control = %d\n",
 			__func__, p_tas2562->spk_r_control);
 	p_tas2562->spk_r_control = p_u_control->value.integer.value[0];
 	return 0;
@@ -491,7 +491,7 @@ static int tas2562_iv_slot_config(struct tas2562_priv *p_tas2562)
 {
 	int ret = 0;
 
-	dev_info(p_tas2562->dev, "%s, %d\n", __func__,
+	dev_dbg(p_tas2562->dev, "%s, %d\n", __func__,
 			p_tas2562->mn_slot_width);
 
 	if (p_tas2562->mn_channels == 2) {
@@ -536,7 +536,7 @@ static int tas2562_iv_slot_config(struct tas2562_priv *p_tas2562)
 		p_tas2562->update_bits(p_tas2562, channel_left,
 			TAS2562_TDMCONFIGURATIONREG6, 0xff, 0x40);
 	} else {
-		dev_err(p_tas2562->dev, "%s, wrong params, %d\n",
+		dev_dbg(p_tas2562->dev, "%s, wrong params, %d\n",
 		__func__, p_tas2562->mn_slot_width);
 	}
 
@@ -593,7 +593,7 @@ static int tas2562_set_slot(struct tas2562_priv *p_tas2562, int slot_width)
 	break;
 
 	default:
-		dev_err(p_tas2562->dev, "slot width not supported");
+		dev_dbg(p_tas2562->dev, "slot width not supported");
 		ret = -EINVAL;
 	}
 
@@ -607,7 +607,7 @@ static int tas2562_set_bitwidth(struct tas2562_priv *p_tas2562, int bitwidth)
 {
 	int slot_width_tmp = 16;
 
-	dev_info(p_tas2562->dev, "%s %d\n", __func__, bitwidth);
+	dev_dbg(p_tas2562->dev, "%s %d\n", __func__, bitwidth);
 	switch (bitwidth) {
 	case SNDRV_PCM_FORMAT_S16_LE:
 			p_tas2562->update_bits(p_tas2562, channel_both,
@@ -635,7 +635,7 @@ static int tas2562_set_bitwidth(struct tas2562_priv *p_tas2562, int bitwidth)
 		break;
 
 	default:
-		dev_info(p_tas2562->dev, "Not supported params format\n");
+		dev_dbg(p_tas2562->dev, "Not supported params format\n");
 	}
 
 	tas2562_set_slot(p_tas2562, slot_width_tmp);
@@ -724,7 +724,7 @@ static int tas2562_set_samplerate(struct tas2562_priv *p_tas2562,
 			TAS2562_TDMCONFIGURATIONREG0_SAMPRATE31_176_4_192KHZ);
 			break;
 	default:
-			dev_info(p_tas2562->dev, "%s, unsupported sample rate, %d\n",
+			dev_dbg(p_tas2562->dev, "%s, unsupported sample rate, %d\n",
 			__func__, samplerate);
 	}
 
@@ -830,7 +830,7 @@ static int tas2562_hw_params(struct snd_pcm_substream *substream,
 	n_result = tas2562_set_bitwidth(p_tas2562,
 			params_format(params));
 	if (n_result < 0) {
-		dev_info(p_tas2562->dev, "set bitwidth failed, %d\n", n_result);
+		dev_dbg(p_tas2562->dev, "set bitwidth failed, %d\n", n_result);
 		goto ret;
 	}
 
@@ -855,21 +855,21 @@ static int tas2562_set_fmt(struct tas2562_priv *p_tas2562, unsigned int fmt)
 		asi_cfg_1 = 0x00;
 		break;
 	default:
-		dev_err(p_tas2562->dev, "ASI format master is not found\n");
+		dev_dbg(p_tas2562->dev, "ASI format master is not found\n");
 		ret = -EINVAL;
 	}
 
 	switch (fmt & SND_SOC_DAIFMT_INV_MASK) {
 	case SND_SOC_DAIFMT_NB_NF:
-		dev_info(p_tas2562->dev, "INV format: NBNF\n");
+		dev_dbg(p_tas2562->dev, "INV format: NBNF\n");
 		asi_cfg_1 |= TAS2562_TDMCONFIGURATIONREG1_RXEDGE_RISING;
 		break;
 	case SND_SOC_DAIFMT_IB_NF:
-		dev_info(p_tas2562->dev, "INV format: IBNF\n");
+		dev_dbg(p_tas2562->dev, "INV format: IBNF\n");
 		asi_cfg_1 |= TAS2562_TDMCONFIGURATIONREG1_RXEDGE_FALLING;
 		break;
 	default:
-		dev_err(p_tas2562->dev, "ASI format Inverse is not found\n");
+		dev_dbg(p_tas2562->dev, "ASI format Inverse is not found\n");
 		ret = -EINVAL;
 	}
 
@@ -890,7 +890,7 @@ static int tas2562_set_fmt(struct tas2562_priv *p_tas2562, unsigned int fmt)
 		tdm_rx_start_slot = 0;
 		break;
 	default:
-	dev_err(p_tas2562->dev, "DAI Format is not found, fmt=0x%x\n", fmt);
+	dev_dbg(p_tas2562->dev, "DAI Format is not found, fmt=0x%x\n", fmt);
 	ret = -EINVAL;
 		break;
 	}
@@ -1047,7 +1047,7 @@ static int tas2562_codec_probe(struct snd_soc_codec *codec)
 	ret = snd_soc_add_codec_controls(codec, tas2562_controls,
 					 ARRAY_SIZE(tas2562_controls));
 	if (ret < 0) {
-		pr_err("%s: add_codec_controls failed, err %d\n",
+		pr_debug("%s: add_codec_controls failed, err %d\n",
 			__func__, ret);
 		return ret;
 	}
@@ -1056,7 +1056,7 @@ static int tas2562_codec_probe(struct snd_soc_codec *codec)
 #endif /*CONFIG_TAS25XX_ALGO*/
 	tas2562_load_init(p_tas2562);
 	tas2562_iv_enable(p_tas2562, 1);
-	dev_info(p_tas2562->dev, "%s\n", __func__);
+	dev_dbg(p_tas2562->dev, "%s\n", __func__);
 
 	return 0;
 }
@@ -1116,7 +1116,7 @@ int tas2562_register_codec(struct tas2562_priv *p_tas2562)
 {
 	int n_result = 0;
 
-	dev_info(p_tas2562->dev, "%s, enter\n", __func__);
+	dev_dbg(p_tas2562->dev, "%s, enter\n", __func__);
 	dev_set_name(&(p_tas2562->client->dev), "%s", "tas2562");
 	n_result = snd_soc_register_codec(p_tas2562->dev,
 		&soc_codec_driver_tas2562,

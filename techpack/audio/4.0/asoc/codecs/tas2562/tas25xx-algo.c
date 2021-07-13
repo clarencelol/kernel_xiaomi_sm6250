@@ -46,20 +46,20 @@ static int get_calibrated_re_tcalib(uint32_t *rdc_fix, uint32_t *tv_fix, int cha
 
             if (channel_count == 1) {
                 if (sscanf(calib_data, "%d;%d;", s_rdc_fix, &s_tv_fix) != 2) {
-                    pr_err("TI-SmartPA: %s: file %s read error\n", __func__, filepath);
+                    pr_debug("TI-SmartPA: %s: file %s read error\n", __func__, filepath);
                     ret = -EIO;
                 }
             }
             else if (channel_count == 2) {
                 if (sscanf(calib_data, "%d;%d;%d;", &s_rdc_fix[0], &s_rdc_fix[1], &s_tv_fix) != 3) {
-                    pr_err("TI-SmartPA: %s: file %s read error\n", __func__, filepath);
+                    pr_debug("TI-SmartPA: %s: file %s read error\n", __func__, filepath);
                     ret = -EIO;
                 }
             }
             filp_close(file, NULL);
         }
         else {
-            pr_err("TI-SmartPA: %s: file %s open failed %p \n ", __func__, filepath, file);
+            pr_debug("TI-SmartPA: %s: file %s open failed %p \n ", __func__, filepath, file);
             ret = -EIO;
         }
 #else
@@ -69,23 +69,23 @@ static int get_calibrated_re_tcalib(uint32_t *rdc_fix, uint32_t *tv_fix, int cha
             size = sys_read(fd, calib_data, MAX_STRING - 1);
             sys_close(fd);
 
-            pr_info("TI-SmartPA: %s: *** sys_read size = %d\n", size);
+            pr_debug("TI-SmartPA: %s: *** sys_read size = %d\n", size);
 
             if (channel_count == 1) {
                 if (sscanf(calib_data, "%d;%d;", &rdc_fix[0], tv_fix) != 2) {
-                    pr_err("TI-SmartPA: %s: file %s read error\n", __func__, filepath);
+                    pr_debug("TI-SmartPA: %s: file %s read error\n", __func__, filepath);
                     ret = -EIO;
                 }
             }
             else if (channel_count == 2) {
                 if (sscanf(calib_data, "%d;%d;%d;", &rdc_fix[0], &rdc_fix[1], tv_fix) != 3) {
-                    pr_err("TI-SmartPA: %s: file %s read error\n", __func__, filepath);
+                    pr_debug("TI-SmartPA: %s: file %s read error\n", __func__, filepath);
                     ret = -EIO;
                 }
             }
         }
         else {
-            pr_err("TI-SmartPA: %s: file %s open failed %p \n ", __func__, filepath, file);
+            pr_debug("TI-SmartPA: %s: file %s open failed %p \n ", __func__, filepath, file);
             ret = -EIO;
         }
 #endif /* USE_VFS */
@@ -116,7 +116,7 @@ static int tas25xx_smartamp_get_set(u8 *user_data, uint32_t param_id,
     switch (get_set) {
     case TAS_SET_PARAM:
         if (s_tas_smartamp_bypass) {
-            pr_err("TI-SmartPA: %s: SmartAmp is bypassed no control set\n", __func__);
+            pr_debug("TI-SmartPA: %s: SmartAmp is bypassed no control set\n", __func__);
             goto fail_cmd;
         }
         ret = afe_tas_smartamp_set_calib_data(module_id, param_id, length, user_data);
@@ -167,18 +167,18 @@ static int tas25xx_set_profile(struct snd_kcontrol *pKcontrol,
 
     s_profile_id = profile_id;
 
-    pr_info("TI-SmartPA: %s: Setting profile %s \n", __func__, profile_index_text[profile_id]);
+    pr_debug("TI-SmartPA: %s: Setting profile %s \n", __func__, profile_index_text[profile_id]);
     if (profile_id)
         profile_id -= 1;
     else
         return 0;
 
     param_id = TAS_CALC_PARAM_IDX(TAS_SA_SET_PROFILE, 1, CHANNEL0);
-    pr_info("TI-SmartPA: %s: Sending set profile\n", __func__);
+    pr_debug("TI-SmartPA: %s: Sending set profile\n", __func__);
     ret = tas25xx_smartamp_algo_ctrl((u8 *)&profile_id, param_id,
         TAS_SET_PARAM, sizeof(uint32_t), AFE_SMARTAMP_MODULE_RX);
     if (ret < 0)
-        pr_err("TI-SmartPA: %s: Failed to set config\n", __func__);
+        pr_debug("TI-SmartPA: %s: Failed to set config\n", __func__);
     return ret;
 }
 
@@ -195,7 +195,7 @@ static int tas25xx_get_profile(struct snd_kcontrol *pKcontrol,
         ret = tas25xx_smartamp_algo_ctrl((u8 *)&profile_id, param_id,
             TAS_GET_PARAM, sizeof(uint32_t), AFE_SMARTAMP_MODULE_RX);
         if (ret < 0) {
-            pr_err("TI-SmartPA: %s: Failed to get profile\n", __func__);
+            pr_debug("TI-SmartPA: %s: Failed to get profile\n", __func__);
             profile_id = 0;
         }
         else {
@@ -208,7 +208,7 @@ static int tas25xx_get_profile(struct snd_kcontrol *pKcontrol,
     pUcontrol->value.integer.value[0] = profile_id;
 
     if ((profile_id < max_number_of_profiles) && (profile_id > -1)) {
-        pr_info("TI-SmartPA: %s: getting profile %s\n", __func__, profile_index_text[profile_id]);
+        pr_debug("TI-SmartPA: %s: getting profile %s\n", __func__, profile_index_text[profile_id]);
     }
 
     return 0;
@@ -233,7 +233,7 @@ static int tas25xx_set_Re_left(struct snd_kcontrol *pKcontrol,
 {
     int re_value = pUcontrol->value.integer.value[0];
 
-    pr_info("TI-SmartPA: %s: Setting Re %d", __func__, re_value);
+    pr_debug("TI-SmartPA: %s: Setting Re %d", __func__, re_value);
     return tas25xx_set_Re_common(re_value, CHANNEL0);
 }
 
@@ -272,13 +272,13 @@ static int tas25xx_calib_test_set_common(int calib_command, int channel)
 
     switch (calib_command) {
     case CALIB_START:
-        pr_info("TI-SmartPA: %s: CALIB_START", __func__);
+        pr_debug("TI-SmartPA: %s: CALIB_START", __func__);
         s_calib_test_flag = 1;
         param_id = TAS_CALC_PARAM_IDX(TAS_SA_CALIB_INIT, 1, channel);
         break;
 
     case CALIB_STOP:
-        pr_info("TI-SmartPA: %s: CALIB_STOP", __func__);
+        pr_debug("TI-SmartPA: %s: CALIB_STOP", __func__);
         s_calib_test_flag = 0;
         param_id = TAS_CALC_PARAM_IDX(TAS_SA_CALIB_DEINIT, 1, channel);
         break;
@@ -292,7 +292,7 @@ static int tas25xx_calib_test_set_common(int calib_command, int channel)
         break;
 
     default:
-        pr_info("TI-SmartPA: %s: no impl calib_command %d\n", __func__, calib_command);
+        pr_debug("TI-SmartPA: %s: no impl calib_command %d\n", __func__, calib_command);
         ret = -EINVAL;
         break;
     }
@@ -302,7 +302,7 @@ static int tas25xx_calib_test_set_common(int calib_command, int channel)
             TAS_SET_PARAM, sizeof(uint32_t), AFE_SMARTAMP_MODULE_RX);
         if (ret < 0) {
             s_calib_test_flag = 0;
-            pr_err("TI-SmartPA: %s: Failed to set calib/test, ret=%d\n", __func__, ret);
+            pr_debug("TI-SmartPA: %s: Failed to set calib/test, ret=%d\n", __func__, ret);
         }
     }
 
@@ -332,14 +332,14 @@ static int tas25xx_get_re_common(int channel)
     int re_value = 0;
     int param_id = 0;
 
-    pr_info("TI-SmartPA: %s, channel=%d\n", __func__, channel);
+    pr_debug("TI-SmartPA: %s, channel=%d\n", __func__, channel);
 
     if (s_tas_smartamp_enable && (s_calib_test_flag || s_debug_enable)) {
         param_id = TAS_CALC_PARAM_IDX(TAS_SA_GET_RE, 1, channel);
         ret = tas25xx_smartamp_algo_ctrl((u8 *)&re_value, param_id,
             TAS_GET_PARAM, sizeof(uint32_t), AFE_SMARTAMP_MODULE_RX);
         if (ret < 0) {
-            pr_err("TI-SmartPA: %s: Failed to get Re\n", __func__);
+            pr_debug("TI-SmartPA: %s: Failed to get Re\n", __func__);
         }
         else {
             ret = re_value;
@@ -356,7 +356,7 @@ static int tas25xx_get_re_left(struct snd_kcontrol *pKcontrol,
     if (ret >= 0) {
         pUcontrol->value.integer.value[0] = ret;
         ret = 0;
-        pr_info("TI-SmartPA: %s: Getting Re %d\n", __func__, ret);
+        pr_debug("TI-SmartPA: %s: Getting Re %d\n", __func__, ret);
     }
 
     return ret;
@@ -369,14 +369,14 @@ static int tas25xx_get_f0_common(int channel)
     int param_id = 0;
     int ret = 0;
 
-    pr_info("TI-SmartPA: %s, channel=%d\n", __func__, channel);
+    pr_debug("TI-SmartPA: %s, channel=%d\n", __func__, channel);
 
     if (s_tas_smartamp_enable && (s_calib_test_flag || s_debug_enable)) {
         param_id = TAS_CALC_PARAM_IDX(TAS_SA_GET_F0, 1, channel);
         ret = tas25xx_smartamp_algo_ctrl((u8 *)&f0_value, param_id,
             TAS_GET_PARAM, sizeof(uint32_t), AFE_SMARTAMP_MODULE_RX);
         if (ret < 0) {
-            pr_err("TI-SmartPA: %s: Failed to get F0\n", __func__);
+            pr_debug("TI-SmartPA: %s: Failed to get F0\n", __func__);
         }
         else {
             ret = f0_value;
@@ -393,7 +393,7 @@ static int tas25xx_get_f0_left(struct snd_kcontrol *pKcontrol,
 
     if (ret >= 0) {
         pUcontrol->value.integer.value[0] = ret;
-        pr_info("TI-SmartPA: %s: Getting F0 val=%d\n", __func__, ret);
+        pr_debug("TI-SmartPA: %s: Getting F0 val=%d\n", __func__, ret);
         ret = 0;
     }
 
@@ -407,14 +407,14 @@ static int tas25xx_get_q_common(int channel)
     int q_value = 0;
     int param_id = 0;
 
-    pr_info("TI-SmartPA: %s, channel=%d", __func__, channel);
+    pr_debug("TI-SmartPA: %s, channel=%d", __func__, channel);
 
     if (s_tas_smartamp_enable && (s_calib_test_flag || s_debug_enable)) {
         param_id = TAS_CALC_PARAM_IDX(TAS_SA_GET_Q, 1, channel);
         ret = tas25xx_smartamp_algo_ctrl((u8 *)&q_value, param_id,
             TAS_GET_PARAM, sizeof(uint32_t), AFE_SMARTAMP_MODULE_RX);
         if (ret < 0) {
-            pr_err("TI-SmartPA: %s: Failed to get F0\n", __func__);
+            pr_debug("TI-SmartPA: %s: Failed to get F0\n", __func__);
         }
         else {
             ret = q_value;
@@ -430,7 +430,7 @@ static int tas25xx_get_q_left(struct snd_kcontrol *pKcontrol,
     int ret = tas25xx_get_q_common(CHANNEL0);
     if (ret >= 0) {
         pUcontrol->value.integer.value[0] = ret;
-        pr_info("TI-SmartPA: %s: Getting Q %d\n", __func__, ret);
+        pr_debug("TI-SmartPA: %s: Getting Q %d\n", __func__, ret);
         ret = 0;
     }
 
@@ -444,14 +444,14 @@ static int tas25xx_get_tv_common(int channel)
     int tv_value = 0;
     int param_id = 0;
 
-    pr_info("TI-SmartPA: %s, channel=%d", __func__, channel);
+    pr_debug("TI-SmartPA: %s, channel=%d", __func__, channel);
 
     if (s_tas_smartamp_enable && (s_calib_test_flag || s_debug_enable)) {
         param_id = TAS_CALC_PARAM_IDX(TAS_SA_GET_TV, 1, channel);
         ret = tas25xx_smartamp_algo_ctrl((u8 *)&tv_value, param_id,
             TAS_GET_PARAM, sizeof(uint32_t), AFE_SMARTAMP_MODULE_RX);
         if (ret < 0) {
-            pr_err("TI-SmartPA: %s: Failed to get Tv\n", __func__);
+            pr_debug("TI-SmartPA: %s: Failed to get Tv\n", __func__);
         }
         else {
             ret = tv_value;
@@ -468,7 +468,7 @@ static int tas25xx_get_tv_left(struct snd_kcontrol *pKcontrol,
     int ret = tas25xx_get_tv_common(CHANNEL0);
     if (ret >= 0) {
         pUcontrol->value.integer.value[0] = ret;
-        pr_info("TI-SmartPA: %s: Getting Tv %d\n", __func__, ret);
+        pr_debug("TI-SmartPA: %s: Getting Tv %d\n", __func__, ret);
         ret = 0;
     }
 
@@ -502,61 +502,61 @@ static int tas25xx_smartamp_enable_set(struct snd_kcontrol *pKcontrol,
 #endif
 
     if (s_tas_smartamp_bypass) {
-        pr_info("TI-SmartPA: bypass enabled, not enabling\n");
+        pr_debug("TI-SmartPA: bypass enabled, not enabling\n");
         return 0;
     }
 
-    pr_info("TI-SmartPA: %s: case %d, number_of_ch=%d\n", __func__, user_data, number_of_ch);
+    pr_debug("TI-SmartPA: %s: case %d, number_of_ch=%d\n", __func__, user_data, number_of_ch);
 
     s_tas_smartamp_enable = user_data;
     if (s_tas_smartamp_enable == 0) {
         s_profile_id = 0;
         s_calib_test_flag = 0;
-        pr_info("TI-SmartPA: %s: Disable called\n", __func__);
+        pr_debug("TI-SmartPA: %s: Disable called\n", __func__);
         return 0;
     }
 
-    pr_info("TI-SmartPA: %s: Setting the feedback module info for TAS\n", __func__);
+    pr_debug("TI-SmartPA: %s: Setting the feedback module info for TAS\n", __func__);
     ret = afe_spk_prot_feed_back_cfg(TAS_TX_PORT, TAS_RX_PORT, 1, 0, 1);
     if (ret) {
-        pr_err("TI-SmartPA: %s: FB Path Info failed ignoring ret = 0x%x\n", __func__, ret);
+        pr_debug("TI-SmartPA: %s: FB Path Info failed ignoring ret = 0x%x\n", __func__, ret);
     }
 
-    pr_info("TI-SmartPA: %s: Sending TX Enable\n", __func__);
+    pr_debug("TI-SmartPA: %s: Sending TX Enable\n", __func__);
     param_id = CAPI_V2_TAS_TX_ENABLE;
     ret = tas25xx_smartamp_algo_ctrl((u8 *)&user_data, param_id,
         TAS_SET_PARAM, sizeof(uint32_t), AFE_SMARTAMP_MODULE_TX);
     if (ret) {
-        pr_err("TI-SmartPA: %s: TX Enable Failed ret = 0x%x\n", __func__, ret);
+        pr_debug("TI-SmartPA: %s: TX Enable Failed ret = 0x%x\n", __func__, ret);
         goto fail_cmd;
     }
 
     user_data = 0xB1B1B1B1;
-    pr_info("TI-SmartPA: %s: Sending TX Config\n", __func__);
+    pr_debug("TI-SmartPA: %s: Sending TX Config\n", __func__);
     param_id = CAPI_V2_TAS_TX_CFG;
     ret = tas25xx_smartamp_algo_ctrl((u8 *)&user_data, param_id,
         TAS_SET_PARAM, sizeof(uint32_t), AFE_SMARTAMP_MODULE_TX);
     if (ret < 0) {
-        pr_err("TI-SmartPA: %s: Failed to set config\n", __func__);
+        pr_debug("TI-SmartPA: %s: Failed to set config\n", __func__);
     }
 
     user_data = 1;
-    pr_info("TI-SmartPA: %s: Sending RX Enable\n", __func__);
+    pr_debug("TI-SmartPA: %s: Sending RX Enable\n", __func__);
     param_id = CAPI_V2_TAS_RX_ENABLE;
     ret = tas25xx_smartamp_algo_ctrl((u8 *)&user_data, param_id,
         TAS_SET_PARAM, sizeof(uint32_t), AFE_SMARTAMP_MODULE_RX);
     if (ret) {
-        pr_err("TI-SmartPA: %s: RX Enable Failed ret = 0x%x\n", __func__, ret);
+        pr_debug("TI-SmartPA: %s: RX Enable Failed ret = 0x%x\n", __func__, ret);
         goto fail_cmd;
     }
 
     user_data = 0xB1B1B1B1;
-    pr_info("TI-SmartPA: %s: Sending RX Config\n", __func__);
+    pr_debug("TI-SmartPA: %s: Sending RX Config\n", __func__);
     param_id = CAPI_V2_TAS_RX_CFG;
     ret = tas25xx_smartamp_algo_ctrl((u8 *)&user_data, param_id,
         TAS_SET_PARAM, sizeof(uint32_t), AFE_SMARTAMP_MODULE_RX);
     if (ret < 0) {
-        pr_err("TI-SmartPA: %s: Failed to set config\n", __func__);
+        pr_debug("TI-SmartPA: %s: Failed to set config\n", __func__);
     }
 
     s_tas_smartamp_enable = true;
@@ -570,7 +570,7 @@ static int tas25xx_smartamp_enable_set(struct snd_kcontrol *pKcontrol,
     }
 
     if (ret) {
-        pr_err("[Smartamp:%s] unable to get the calibration data = 0x%x\n", __func__, ret);
+        pr_debug("[Smartamp:%s] unable to get the calibration data = 0x%x\n", __func__, ret);
         //TODO: Ignore the calibration read error
         ret = 0;
     }
@@ -578,12 +578,12 @@ static int tas25xx_smartamp_enable_set(struct snd_kcontrol *pKcontrol,
         int32_t t_cal;
         if (number_of_ch == 2) {
             t_cal = calibration_data[2];
-            pr_info("[Smartamp:%s] setting re %d,%d and tcal %d\n", __func__
+            pr_debug("[Smartamp:%s] setting re %d,%d and tcal %d\n", __func__
                 , calibration_data[0], calibration_data[1], calibration_data[2]);
         }
         else {
             t_cal = calibration_data[1];
-            pr_info("[Smartamp:%s] setting re %d and tcal %d\n", __func__
+            pr_debug("[Smartamp:%s] setting re %d and tcal %d\n", __func__
                 , calibration_data[0], calibration_data[1]);
         }
 
@@ -591,7 +591,7 @@ static int tas25xx_smartamp_enable_set(struct snd_kcontrol *pKcontrol,
         ret = tas25xx_smartamp_algo_ctrl((u8 *)&t_cal,
             param_id, TAS_SET_PARAM, sizeof(uint32_t), AFE_SMARTAMP_MODULE_RX);
         if (ret < 0) {
-            pr_err("[Smartamp:%s] Failed to set Tcal\n", __func__);
+            pr_debug("[Smartamp:%s] Failed to set Tcal\n", __func__);
             goto fail_cmd;
         }
 
@@ -599,7 +599,7 @@ static int tas25xx_smartamp_enable_set(struct snd_kcontrol *pKcontrol,
         ret = tas25xx_smartamp_algo_ctrl((u8 *)(&(calibration_data[0])),
             param_id, TAS_SET_PARAM, sizeof(uint32_t), AFE_SMARTAMP_MODULE_RX);
         if (ret < 0) {
-            pr_err("TI-SmartPA: %s: Failed to set Re\n", __func__);
+            pr_debug("TI-SmartPA: %s: Failed to set Re\n", __func__);
             goto fail_cmd;
         }
 
@@ -608,7 +608,7 @@ static int tas25xx_smartamp_enable_set(struct snd_kcontrol *pKcontrol,
             ret = tas25xx_smartamp_algo_ctrl((u8 *)&(calibration_data[1]),
                 param_id, TAS_SET_PARAM, sizeof(uint32_t), AFE_SMARTAMP_MODULE_RX);
             if (ret < 0) {
-                pr_err("TI-SmartPA: %s: Failed to set Re\n", __func__);
+                pr_debug("TI-SmartPA: %s: Failed to set Re\n", __func__);
                 goto fail_cmd;
             }
         }
@@ -625,7 +625,7 @@ static int tas25xx_smartamp_enable_get(struct snd_kcontrol *pKcontrol,
     int ret = 0;
     int user_data = s_tas_smartamp_enable;
     pUcontrol->value.integer.value[0] = user_data;
-    pr_info("TI-SmartPA: %s: case %d(0=DISABLE, 1=ENABLE)\n", __func__, user_data);
+    pr_debug("TI-SmartPA: %s: case %d(0=DISABLE, 1=ENABLE)\n", __func__, user_data);
     return ret;
 }
 
@@ -650,7 +650,7 @@ static int tas25xx_smartamp_bypass_set(struct snd_kcontrol *pKcontrol,
     }
 
     s_tas_smartamp_bypass = user_data;
-    pr_info("TI-SmartPA: %s: case %d(FALSE=0,TRUE=1)\n", __func__, user_data);
+    pr_debug("TI-SmartPA: %s: case %d(FALSE=0,TRUE=1)\n", __func__, user_data);
     return ret;
 }
 
@@ -659,7 +659,7 @@ static int tas25xx_smartamp_bypass_get(struct snd_kcontrol *pKcontrol,
 {
     int ret = 0;
     pUcontrol->value.integer.value[0] = s_tas_smartamp_bypass;
-    pr_info("TI-SmartPA: %s: case %d\n", __func__, s_tas_smartamp_bypass);
+    pr_debug("TI-SmartPA: %s: case %d\n", __func__, s_tas_smartamp_bypass);
     return ret;
 }
 
@@ -680,7 +680,7 @@ static int tas25xx_smartamp_debug_enable_set(struct snd_kcontrol *pKcontrol,
     int user_data = pUcontrol->value.integer.value[0];
 
     s_debug_enable = user_data;
-    pr_info("TI-SmartPA: %s: case %d(FALSE=0,TRUE=1)\n", __func__, user_data);
+    pr_debug("TI-SmartPA: %s: case %d(FALSE=0,TRUE=1)\n", __func__, user_data);
     return ret;
 }
 
@@ -689,7 +689,7 @@ static int tas25xx_smartamp_debug_enable_get(struct snd_kcontrol *pKcontrol,
 {
     int ret = 0;
     pUcontrol->value.integer.value[0] = s_debug_enable;
-    pr_info("TI-SmartPA: %s: case %d\n", __func__, s_debug_enable);
+    pr_debug("TI-SmartPA: %s: case %d\n", __func__, s_debug_enable);
     return ret;
 }
 
@@ -700,12 +700,12 @@ static int tas25xx_set_spk_id(struct snd_kcontrol *pKcontrol,
     int speaker_id = pUcontrol->value.integer.value[0];
     int param_id = 0;
 
-    pr_info("TI-SmartPA: %s: spk-id set %d\n", __func__, speaker_id);
+    pr_debug("TI-SmartPA: %s: spk-id set %d\n", __func__, speaker_id);
     param_id = TAS_CALC_PARAM_IDX(TAS_SA_SET_SPKID, 1, CHANNEL0);
     ret = tas25xx_smartamp_algo_ctrl((u8 *)&speaker_id, param_id,
         TAS_SET_PARAM, sizeof(uint32_t), AFE_SMARTAMP_MODULE_RX);
     if (ret < 0) {
-        pr_err("TI-SmartPA: %s: Failed to set spk id\n", __func__);
+        pr_debug("TI-SmartPA: %s: Failed to set spk id\n", __func__);
     }
 
     return ret;
@@ -718,13 +718,13 @@ static int tas25xx_set_t_calib(struct snd_kcontrol *pKcontrol,
     int calib_temp = pUcontrol->value.integer.value[0];
     int param_id = 0;
 
-    pr_info("TI-SmartPA: %s: tcalib set %d\n", __func__, calib_temp);
+    pr_debug("TI-SmartPA: %s: tcalib set %d\n", __func__, calib_temp);
     if (s_tas_smartamp_enable) {
         param_id = TAS_CALC_PARAM_IDX(TAS_SA_SET_TCAL, 1, CHANNEL0);
         ret = tas25xx_smartamp_algo_ctrl((u8 *)&calib_temp, param_id,
             TAS_SET_PARAM, sizeof(uint32_t), AFE_SMARTAMP_MODULE_RX);
         if (ret < 0) {
-            pr_err("TI-SmartPA: %s: Failed to set spk id\n", __func__);
+            pr_debug("TI-SmartPA: %s: Failed to set spk id\n", __func__);
         }
     }
 
@@ -737,7 +737,7 @@ static int tas25xx_set_Re_right(struct snd_kcontrol *pKcontrol,
 {
     int re_value = pUcontrol->value.integer.value[0];
 
-    pr_info("TI-SmartPA: %s: Setting Re %d\n", __func__, re_value);
+    pr_debug("TI-SmartPA: %s: Setting Re %d\n", __func__, re_value);
     return tas25xx_set_Re_common(re_value, CHANNEL1);
 }
 
@@ -750,7 +750,7 @@ static int tas25xx_get_re_right(struct snd_kcontrol *pKcontrol,
     if (ret >= 0) {
         pUcontrol->value.integer.value[0] = ret;
         ret = 0;
-        pr_info("TI-SmartPA: %s: Getting Re value=%d\n", __func__, ret);
+        pr_debug("TI-SmartPA: %s: Getting Re value=%d\n", __func__, ret);
     }
 
     return ret;
@@ -763,7 +763,7 @@ static int tas25xx_get_f0_right(struct snd_kcontrol *pKcontrol,
 
     if (ret >= 0) {
         pUcontrol->value.integer.value[0] = ret;
-        pr_info("TI-SmartPA: %s: Getting F0 valu=%d\n", __func__, ret);
+        pr_debug("TI-SmartPA: %s: Getting F0 valu=%d\n", __func__, ret);
         ret = 0;
     }
 
@@ -776,7 +776,7 @@ static int tas25xx_get_q_right(struct snd_kcontrol *pKcontrol,
     int ret = tas25xx_get_q_common(CHANNEL1);
     if (ret >= 0) {
         pUcontrol->value.integer.value[0] = ret;
-        pr_info("TI-SmartPA: %s: Getting Q val=%d\n", __func__, ret);
+        pr_debug("TI-SmartPA: %s: Getting Q val=%d\n", __func__, ret);
         ret = 0;
     }
 
@@ -790,7 +790,7 @@ static int tas25xx_get_tv_right(struct snd_kcontrol *pKcontrol,
     int ret = tas25xx_get_tv_common(CHANNEL1);
     if (ret >= 0) {
         pUcontrol->value.integer.value[0] = ret;
-        pr_info("TI-SmartPA: %s: Getting Tv %d\n", __func__, ret);
+        pr_debug("TI-SmartPA: %s: Getting Tv %d\n", __func__, ret);
         ret = 0;
     }
 
@@ -845,7 +845,7 @@ static const struct snd_kcontrol_new smartamp_tas25xx_mixer_controls[] = {
 #if CODEC_CONTROL
 void tas_smartamp_add_algo_controls(struct snd_soc_codec *codec)
 {
-    pr_err("TI-SmartPA: %s: Adding smartamp controls\n", __func__);
+    pr_debug("TI-SmartPA: %s: Adding smartamp controls\n", __func__);
     mutex_init(&routing_lock);
     snd_soc_add_codec_controls(codec, smartamp_tas25xx_mixer_controls,
         ARRAY_SIZE(smartamp_tas25xx_mixer_controls));
@@ -855,7 +855,7 @@ EXPORT_SYMBOL(tas_smartamp_add_algo_controls);
 #else
 void tas_smartamp_add_algo_controls_for_platform(struct snd_soc_platform *platform)
 {
-    pr_err("TI-SmartPA: %s: Adding smartamp controls\n", __func__);
+    pr_debug("TI-SmartPA: %s: Adding smartamp controls\n", __func__);
     mutex_init(&routing_lock);
     snd_soc_add_platform_controls(platform, smartamp_tas25xx_mixer_controls, ARRAY_SIZE(smartamp_tas25xx_mixer_controls));
     tas_calib_init();

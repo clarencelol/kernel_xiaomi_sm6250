@@ -172,14 +172,14 @@ static int tas2562_change_book_page(struct tas2562_priv *p_tas2562,
 	if ((chn&channel_left) || (p_tas2562->mn_channels == 1)) {
 		p_tas2562->client->addr = p_tas2562->mn_l_addr;
 		if (p_tas2562->mn_l_current_book != book) {
-			dev_err(p_tas2562->dev, "%s,  L=%d\n",
+			dev_dbg(p_tas2562->dev, "%s,  L=%d\n",
 						__func__, __LINE__);
 			n_result = tas2562_regmap_write(p_tas2562,
 				TAS2562_BOOKCTL_PAGE, 0);
-			dev_err(p_tas2562->dev, "%s,  L=%d\n",
+			dev_dbg(p_tas2562->dev, "%s,  L=%d\n",
 						__func__, __LINE__);
 			if (n_result < 0) {
-				dev_err(p_tas2562->dev, "%s, ERROR, L=%d, E=%d\n",
+				dev_dbg(p_tas2562->dev, "%s, ERROR, L=%d, E=%d\n",
 					__func__, __LINE__, n_result);
 				goto end;
 			}
@@ -187,7 +187,7 @@ static int tas2562_change_book_page(struct tas2562_priv *p_tas2562,
 			n_result = tas2562_regmap_write(p_tas2562,
 				TAS2562_BOOKCTL_REG, book);
 			if (n_result < 0) {
-				dev_err(p_tas2562->dev, "%s, ERROR, L=%d, E=%d\n",
+				dev_dbg(p_tas2562->dev, "%s, ERROR, L=%d, E=%d\n",
 					__func__, __LINE__, n_result);
 				goto end;
 			}
@@ -198,7 +198,7 @@ static int tas2562_change_book_page(struct tas2562_priv *p_tas2562,
 			n_result = tas2562_regmap_write(p_tas2562,
 				TAS2562_BOOKCTL_PAGE, page);
 			if (n_result < 0) {
-				dev_err(p_tas2562->dev, "%s, ERROR, L=%d, E=%d\n",
+				dev_dbg(p_tas2562->dev, "%s, ERROR, L=%d, E=%d\n",
 					__func__, __LINE__, n_result);
 				goto end;
 			}
@@ -209,14 +209,14 @@ static int tas2562_change_book_page(struct tas2562_priv *p_tas2562,
 	if ((chn&channel_right) && (p_tas2562->mn_channels == 2)) {
 		p_tas2562->client->addr = p_tas2562->mn_r_addr;
 		if (p_tas2562->mn_r_current_book != book) {
-			dev_err(p_tas2562->dev, "%s,  L=%d\n",
+			dev_dbg(p_tas2562->dev, "%s,  L=%d\n",
 						__func__, __LINE__);
 			n_result = tas2562_regmap_write(p_tas2562,
 				TAS2562_BOOKCTL_PAGE, 0);
-			dev_err(p_tas2562->dev, "%s,  L=%d\n",
+			dev_dbg(p_tas2562->dev, "%s,  L=%d\n",
 						__func__, __LINE__);
 			if (n_result < 0) {
-				dev_err(p_tas2562->dev, "%s, ERROR, L=%d, E=%d\n",
+				dev_dbg(p_tas2562->dev, "%s, ERROR, L=%d, E=%d\n",
 					__func__, __LINE__, n_result);
 				goto end;
 			}
@@ -224,7 +224,7 @@ static int tas2562_change_book_page(struct tas2562_priv *p_tas2562,
 			n_result = tas2562_regmap_write(p_tas2562,
 				TAS2562_BOOKCTL_REG, book);
 			if (n_result < 0) {
-				dev_err(p_tas2562->dev, "%s, ERROR, L=%d, E=%d\n",
+				dev_dbg(p_tas2562->dev, "%s, ERROR, L=%d, E=%d\n",
 					__func__, __LINE__, n_result);
 				goto end;
 			}
@@ -235,7 +235,7 @@ static int tas2562_change_book_page(struct tas2562_priv *p_tas2562,
 			n_result = tas2562_regmap_write(p_tas2562,
 				TAS2562_BOOKCTL_PAGE, page);
 			if (n_result < 0) {
-				dev_err(p_tas2562->dev, "%s, ERROR, L=%d, E=%d\n",
+				dev_dbg(p_tas2562->dev, "%s, ERROR, L=%d, E=%d\n",
 					__func__, __LINE__, n_result);
 				goto end;
 			}
@@ -265,12 +265,12 @@ static int tas2562_dev_read(struct tas2562_priv *p_tas2562,
 	else if (chn == channel_right)
 		p_tas2562->client->addr = p_tas2562->mn_r_addr;
 	else
-		dev_err(p_tas2562->dev, "%s, wrong channel number\n", __func__);
+		dev_dbg(p_tas2562->dev, "%s, wrong channel number\n", __func__);
 
 	n_result = tas2562_regmap_read(p_tas2562,
 		TAS2562_PAGE_REG(reg), pValue);
 	if (n_result < 0)
-		dev_err(p_tas2562->dev, "%s, ERROR, L=%d, E=%d\n",
+		dev_dbg(p_tas2562->dev, "%s, ERROR, L=%d, E=%d\n",
 			__func__, __LINE__, n_result);
 	else
 		dev_dbg(p_tas2562->dev,
@@ -304,7 +304,7 @@ static int tas2562_dev_write(struct tas2562_priv *p_tas2562, enum channel chn,
 		n_result = tas2562_regmap_write(p_tas2562,
 			TAS2562_PAGE_REG(reg), value);
 		if (n_result < 0)
-			dev_err(p_tas2562->dev, "%s, ERROR, L=%d, E=%d\n",
+			dev_dbg(p_tas2562->dev, "%s, ERROR, L=%d, E=%d\n",
 				__func__, __LINE__, n_result);
 		else
 			dev_dbg(p_tas2562->dev,
@@ -320,7 +320,7 @@ static int tas2562_dev_write(struct tas2562_priv *p_tas2562, enum channel chn,
 		n_result = tas2562_regmap_write(p_tas2562,
 		TAS2562_PAGE_REG(reg),value);
 		if (n_result < 0)
-			dev_err(p_tas2562->dev, "%s, ERROR, L=%d, E=%d\n",
+			dev_dbg(p_tas2562->dev, "%s, ERROR, L=%d, E=%d\n",
 				__func__, __LINE__, n_result);
 		else
 			dev_dbg(p_tas2562->dev, "%s: chn%x:BOOK:PAGE:REG %u:%u:%u, VAL: 0x%02x\n",
@@ -353,7 +353,7 @@ static int tas2562_dev_bulk_write(struct tas2562_priv *p_tas2562,
 		n_result = tas2562_regmap_bulk_write(p_tas2562,
 			TAS2562_PAGE_REG(reg), p_data, n_length);
 		if (n_result < 0)
-			dev_err(p_tas2562->dev, "%s, ERROR, L=%d, E=%d\n",
+			dev_dbg(p_tas2562->dev, "%s, ERROR, L=%d, E=%d\n",
 				__func__, __LINE__, n_result);
 		else
 			dev_dbg(p_tas2562->dev, "%s: chn%x:BOOK:PAGE:REG %u:%u:%u, len: 0x%02x\n",
@@ -367,7 +367,7 @@ static int tas2562_dev_bulk_write(struct tas2562_priv *p_tas2562,
 				n_result = tas2562_regmap_bulk_write(p_tas2562,
 			TAS2562_PAGE_REG(reg), p_data, n_length);
 		if (n_result < 0)
-			dev_err(p_tas2562->dev, "%s, ERROR, L=%d, E=%d\n",
+			dev_dbg(p_tas2562->dev, "%s, ERROR, L=%d, E=%d\n",
 				__func__, __LINE__, n_result);
 		else
 			dev_dbg(p_tas2562->dev, "%s: %x:BOOK:PAGE:REG %u:%u:%u, len: 0x%02x\n",
@@ -394,7 +394,7 @@ static int tas2562_dev_bulk_read(struct tas2562_priv *p_tas2562,
 	else if (chn == channel_right)
 		p_tas2562->client->addr = p_tas2562->mn_r_addr;
 	else
-		dev_err(p_tas2562->dev, "%s, wrong channel number\n", __func__);
+		dev_dbg(p_tas2562->dev, "%s, wrong channel number\n", __func__);
 
 	n_result = tas2562_change_book_page(p_tas2562, chn,
 		TAS2562_BOOK_ID(reg), TAS2562_PAGE_ID(reg));
@@ -404,7 +404,7 @@ static int tas2562_dev_bulk_read(struct tas2562_priv *p_tas2562,
 	n_result = tas2562_regmap_bulk_read(p_tas2562,
 	TAS2562_PAGE_REG(reg), p_data, n_length);
 	if (n_result < 0)
-		dev_err(p_tas2562->dev, "%s, ERROR, L=%d, E=%d\n",
+		dev_dbg(p_tas2562->dev, "%s, ERROR, L=%d, E=%d\n",
 			__func__, __LINE__, n_result);
 	else
 		dev_dbg(p_tas2562->dev, "%s: chn%x:BOOK:PAGE:REG %u:%u:%u, len: 0x%02x\n",
@@ -433,7 +433,7 @@ static int tas2562_dev_update_bits(struct tas2562_priv *p_tas2562,
 		n_result = tas2562_regmap_update_bits(p_tas2562,
 			TAS2562_PAGE_REG(reg), mask, value);
 		if (n_result < 0)
-			dev_err(p_tas2562->dev, "%s, ERROR, L=%d, E=%d\n",
+			dev_dbg(p_tas2562->dev, "%s, ERROR, L=%d, E=%d\n",
 				__func__, __LINE__, n_result);
 		else
 			dev_dbg(p_tas2562->dev,
@@ -448,7 +448,7 @@ static int tas2562_dev_update_bits(struct tas2562_priv *p_tas2562,
 		n_result = tas2562_regmap_update_bits(p_tas2562,
 			TAS2562_PAGE_REG(reg), mask, value);
 		if (n_result < 0)
-			dev_err(p_tas2562->dev, "%s, ERROR, L=%d, E=%d\n",
+			dev_dbg(p_tas2562->dev, "%s, ERROR, L=%d, E=%d\n",
 				__func__, __LINE__, n_result);
 		else
 			dev_dbg(p_tas2562->dev,
@@ -504,7 +504,7 @@ static void tas2562_hw_reset(struct tas2562_priv *p_tas2562)
 		}
 		msleep(20);
 	}
-	dev_info(p_tas2562->dev, "reset gpio up !!\n");
+	dev_dbg(p_tas2562->dev, "reset gpio up !!\n");
 
 	p_tas2562->mn_l_current_book = -1;
 	p_tas2562->mn_l_current_page = -1;
@@ -526,7 +526,7 @@ void tas2562_enable_irq(struct tas2562_priv *p_tas2562, bool enable)
 			if (desc && desc->depth > 0) {
 			enable_irq(p_tas2562->mn_irq);
 			} else {
-				dev_info (p_tas2562->dev, "### irq already enabled");
+				dev_dbg (p_tas2562->dev, "### irq already enabled");
 			}
 			irq1_enabled = 1;
 		}
@@ -559,19 +559,19 @@ static void irq_work_routine(struct work_struct *work)
 	int n_result = 0;
 	enum channel chn;
 
-	dev_info(p_tas2562->dev, "%s\n", __func__);
+	dev_dbg(p_tas2562->dev, "%s\n", __func__);
 #ifdef CONFIG_TAS2562_CODEC
 	mutex_lock(&p_tas2562->codec_lock);
 #endif
 	tas2562_enable_irq(p_tas2562, false);
 
 	if (p_tas2562->mb_runtime_suspend) {
-		dev_info(p_tas2562->dev, "%s, Runtime Suspended\n", __func__);
+		dev_dbg(p_tas2562->dev, "%s, Runtime Suspended\n", __func__);
 		goto end;
 	}
 
 	if (p_tas2562->mn_power_state == TAS2562_POWER_SHUTDOWN) {
-		dev_info(p_tas2562->dev, "%s, device not powered\n", __func__);
+		dev_dbg(p_tas2562->dev, "%s, device not powered\n", __func__);
 		goto end;
 	}
 
@@ -615,7 +615,7 @@ static void irq_work_routine(struct work_struct *work)
 	else
 		goto reload;
 
-	dev_info(p_tas2562->dev, "IRQ status : 0x%x, 0x%x, 0x%x, 0x%x\n",
+	dev_dbg(p_tas2562->dev, "IRQ status : 0x%x, 0x%x, 0x%x, 0x%x\n",
 			nDevInt1Status, nDevInt2Status,
 			nDevInt3Status, nDevInt4Status);
 
@@ -632,7 +632,7 @@ static void irq_work_routine(struct work_struct *work)
 		(nDevInt3Status &
 	    TAS2562_LATCHEDINTERRUPTREG0_TDMCLOCKERRORSTICKY_INTERRUPT)) {
 			p_tas2562->mn_err_code |= ERROR_CLOCK;
-			dev_err(p_tas2562->dev, "TDM clock error!\n");
+			dev_dbg(p_tas2562->dev, "TDM clock error!\n");
 	} else
 		p_tas2562->mn_err_code &= ~ERROR_OVER_CURRENT;
 
@@ -641,7 +641,7 @@ static void irq_work_routine(struct work_struct *work)
 		(nDevInt3Status &
 		TAS2562_LATCHEDINTERRUPTREG0_OCEFLAGSTICKY_INTERRUPT)) {
 		p_tas2562->mn_err_code |= ERROR_OVER_CURRENT;
-		dev_err(p_tas2562->dev, "SPK over current!\n");
+		dev_dbg(p_tas2562->dev, "SPK over current!\n");
 	} else
 		p_tas2562->mn_err_code &= ~ERROR_OVER_CURRENT;
 
@@ -650,7 +650,7 @@ static void irq_work_routine(struct work_struct *work)
 		(nDevInt3Status &
 		TAS2562_LATCHEDINTERRUPTREG0_OTEFLAGSTICKY_INTERRUPT)) {
 		p_tas2562->mn_err_code |= ERROR_DIE_OVERTEMP;
-		dev_err(p_tas2562->dev, "die over temperature!\n");
+		dev_dbg(p_tas2562->dev, "die over temperature!\n");
 	} else
 		p_tas2562->mn_err_code &= ~ERROR_DIE_OVERTEMP;
 
@@ -659,7 +659,7 @@ static void irq_work_routine(struct work_struct *work)
 		(nDevInt4Status &
 	TAS2562_LATCHEDINTERRUPTREG1_VBATOVLOSTICKY_INTERRUPT)) {
 		p_tas2562->mn_err_code |= ERROR_OVER_VOLTAGE;
-		dev_err(p_tas2562->dev, "SPK over voltage!\n");
+		dev_dbg(p_tas2562->dev, "SPK over voltage!\n");
 	} else
 		p_tas2562->mn_err_code &= ~ERROR_UNDER_VOLTAGE;
 
@@ -668,7 +668,7 @@ static void irq_work_routine(struct work_struct *work)
 		(nDevInt4Status &
 	TAS2562_LATCHEDINTERRUPTREG1_VBATUVLOSTICKY_INTERRUPT)) {
 		p_tas2562->mn_err_code |= ERROR_UNDER_VOLTAGE;
-		dev_err(p_tas2562->dev, "SPK under voltage!\n");
+		dev_dbg(p_tas2562->dev, "SPK under voltage!\n");
 	} else
 		p_tas2562->mn_err_code &= ~ERROR_UNDER_VOLTAGE;
 
@@ -677,7 +677,7 @@ static void irq_work_routine(struct work_struct *work)
 		(nDevInt4Status &
 	TAS2562_LATCHEDINTERRUPTREG1_BROWNOUTFLAGSTICKY_INTERRUPT)) {
 		p_tas2562->mn_err_code |= ERROR_BROWNOUT;
-		dev_err(p_tas2562->dev, "brownout!\n");
+		dev_dbg(p_tas2562->dev, "brownout!\n");
 	} else
 		p_tas2562->mn_err_code &= ~ERROR_BROWNOUT;
 
@@ -734,7 +734,7 @@ static void irq_work_routine(struct work_struct *work)
 			& TAS2562_POWERCONTROL_OPERATIONALMODE10_MASK)
 			== TAS2562_POWERCONTROL_OPERATIONALMODE10_SHUTDOWN)
 			&& (chn & channel_right))) {
-			dev_err(p_tas2562->dev, "%s, Critical ERROR REG[0x%x] = 0x%x\n",
+			dev_dbg(p_tas2562->dev, "%s, Critical ERROR REG[0x%x] = 0x%x\n",
 				__func__,
 				TAS2562_POWERCONTROL,
 				nDevInt1Status);
@@ -773,7 +773,7 @@ static void init_work_routine(struct work_struct *work)
 		container_of(work, struct tas2562_priv, init_work.work);
 	int nResult = 0;
 	//int irqreg;
-	//dev_info(p_tas2562->dev, "%s\n", __func__);
+	//dev_dbg(p_tas2562->dev, "%s\n", __func__);
 #ifdef CONFIG_TAS2562_CODEC
 	mutex_lock(&p_tas2562->codec_lock);
 #endif
@@ -782,11 +782,11 @@ static void init_work_routine(struct work_struct *work)
 		TAS2562_POWERCONTROL_OPERATIONALMODE10_MASK,
 		TAS2562_POWERCONTROL_OPERATIONALMODE10_ACTIVE);
 
-	//dev_info(p_tas2562->dev, "set ICN to -80dB\n");
+	//dev_dbg(p_tas2562->dev, "set ICN to -80dB\n");
 	nResult = p_tas2562->bulk_write(p_tas2562, channel_both, TAS2562_ICN_REG, p_icn, 4);
 
 	nResult = gpio_get_value(p_tas2562->mn_irq_gpio);
-	//dev_info(p_tas2562->dev, "%s, irq GPIO state: %d\n", __func__, nResult);
+	//dev_dbg(p_tas2562->dev, "%s, irq GPIO state: %d\n", __func__, nResult);
 
 #ifdef CONFIG_TAS2562_CODEC
 	mutex_unlock(&p_tas2562->codec_lock);
@@ -830,7 +830,7 @@ static int tas2562_pm_suspend(struct device *dev)
 	struct tas2562_priv *p_tas2562 = dev_get_drvdata(dev);
 
 	if(!p_tas2562){
-		dev_err(p_tas2562->dev, "drvdata is NULL\n");
+		dev_dbg(p_tas2562->dev, "drvdata is NULL\n");
 		return -EINVAL;
 	}
 
@@ -845,7 +845,7 @@ static int tas2562_pm_resume(struct device *dev)
 	struct tas2562_priv *p_tas2562 = dev_get_drvdata(dev);
 
 	if(!p_tas2562){
-		dev_err(p_tas2562->dev, "drvdata is NULL\n");
+		dev_dbg(p_tas2562->dev, "drvdata is NULL\n");
 		return -EINVAL;
 	}
 	mutex_lock(&p_tas2562->codec_lock);
@@ -860,14 +860,14 @@ struct tas2562_priv *g_p_tas2562;
 void tas2562_software_reset(void *prv_data)
 {
 	(void)prv_data;
-	pr_err("[TI-SmartPA:%s]\n", __func__);
+	pr_debug("[TI-SmartPA:%s]\n", __func__);
 	schedule_delayed_work(&g_p_tas2562->dc_work, msecs_to_jiffies(10));
 }
 
 static void dc_work_routine(struct work_struct *work)
 {
 	(void)work;
-	pr_err("[TI-SmartPA:%s]\n", __func__);
+	pr_debug("[TI-SmartPA:%s]\n", __func__);
 	tas2562_enable_irq(g_p_tas2562, false);
 	g_p_tas2562->write(g_p_tas2562, channel_both, TAS2562_SOFTWARERESET,
 		TAS2562_SOFTWARERESET_SOFTWARERESET_RESET);
@@ -882,67 +882,67 @@ static int tas2562_parse_dt(struct device *dev, struct tas2562_priv *p_tas2562)
 
 	rc = of_property_read_u32(np, "ti,channels", &p_tas2562->mn_channels);
 	if (rc) {
-		dev_err(p_tas2562->dev, "Looking up %s property in node %s failed %d\n",
+		dev_dbg(p_tas2562->dev, "Looking up %s property in node %s failed %d\n",
 			"ti,channels", np->full_name, rc);
 	} else {
-		dev_err(p_tas2562->dev, "ti,channels=%d",
+		dev_dbg(p_tas2562->dev, "ti,channels=%d",
 			p_tas2562->mn_channels);
 	}
 
 	rc = of_property_read_u32(np, "ti,left-channel", &p_tas2562->mn_l_addr);
 	if (rc) {
-		dev_err(p_tas2562->dev, "Looking up %s property in node %s failed %d\n",
+		dev_dbg(p_tas2562->dev, "Looking up %s property in node %s failed %d\n",
 			"ti,left-channel", np->full_name, rc);
 	} else {
-		dev_err(p_tas2562->dev, "ti,left-channel=0x%x",
+		dev_dbg(p_tas2562->dev, "ti,left-channel=0x%x",
 			p_tas2562->mn_l_addr);
 	}
 	if(p_tas2562->mn_channels != 1) {
 		rc = of_property_read_u32(np, "ti,right-channel",
 			&p_tas2562->mn_r_addr);
 		if (rc) {
-			dev_err(p_tas2562->dev, "Looking up %s property in node %s failed %d\n",
+			dev_dbg(p_tas2562->dev, "Looking up %s property in node %s failed %d\n",
 				"ti,right-channel", np->full_name, rc);
 		} else {
-			dev_err(p_tas2562->dev, "ti,right-channel=0x%x",
+			dev_dbg(p_tas2562->dev, "ti,right-channel=0x%x",
 				p_tas2562->mn_r_addr);
 		}
 	}
 	p_tas2562->mn_reset_gpio = of_get_named_gpio(np, "ti,reset-gpio", 0);
 	if (!gpio_is_valid(p_tas2562->mn_reset_gpio)) {
-		dev_err(p_tas2562->dev, "Looking up %s property in node %s failed %d\n",
+		dev_dbg(p_tas2562->dev, "Looking up %s property in node %s failed %d\n",
 			"ti,reset-gpio", np->full_name,
 				p_tas2562->mn_reset_gpio);
 	} else {
-		dev_info(p_tas2562->dev, "ti,reset-gpio=%d",
+		dev_dbg(p_tas2562->dev, "ti,reset-gpio=%d",
 			p_tas2562->mn_reset_gpio);
 	}
 	if(p_tas2562->mn_channels != 1) {
 		p_tas2562->mn_reset_gpio2 = of_get_named_gpio(np, "ti,reset-gpio2", 0);
 		if (!gpio_is_valid(p_tas2562->mn_reset_gpio2)) {
-			dev_err(p_tas2562->dev, "Looking up %s property in node %s failed %d\n",
+			dev_dbg(p_tas2562->dev, "Looking up %s property in node %s failed %d\n",
 				"ti,reset-gpio2", np->full_name,
 				p_tas2562->mn_reset_gpio2);
 		} else {
-			dev_err(p_tas2562->dev, "ti,reset-gpio2=%d",
+			dev_dbg(p_tas2562->dev, "ti,reset-gpio2=%d",
 				p_tas2562->mn_reset_gpio2);
 		}
 	}
 	p_tas2562->mn_irq_gpio = of_get_named_gpio(np, "ti,irq-gpio", 0);
 	if (!gpio_is_valid(p_tas2562->mn_irq_gpio)) {
-		dev_err(p_tas2562->dev, "Looking up %s property in node %s failed %d\n",
+		dev_dbg(p_tas2562->dev, "Looking up %s property in node %s failed %d\n",
 			"ti,irq-gpio", np->full_name, p_tas2562->mn_irq_gpio);
 	} else {
-		dev_info(p_tas2562->dev, "ti,irq-gpio=%d",
+		dev_dbg(p_tas2562->dev, "ti,irq-gpio=%d",
 			p_tas2562->mn_irq_gpio);
 	}
 	if(p_tas2562->mn_channels != 1) {
 		p_tas2562->mn_irq_gpio2 = of_get_named_gpio(np, "ti,irq-gpio2", 0);
 		if (!gpio_is_valid(p_tas2562->mn_irq_gpio2)) {
-			dev_err(p_tas2562->dev, "Looking up %s property in node %s failed %d\n",
+			dev_dbg(p_tas2562->dev, "Looking up %s property in node %s failed %d\n",
 			"ti,irq-gpio2", np->full_name, p_tas2562->mn_irq_gpio2);
 		} else {
-			dev_err(p_tas2562->dev, "ti,irq-gpio2=%d",
+			dev_dbg(p_tas2562->dev, "ti,irq-gpio2=%d",
 				p_tas2562->mn_irq_gpio2);
 		}
 	}
@@ -955,13 +955,13 @@ static int tas2562_i2c_probe(struct i2c_client *p_client,
 	struct tas2562_priv *p_tas2562 = NULL;
 	int n_result;
 
-	dev_err(&p_client->dev, "Driver ID: %s\n", TAS2562_DRIVER_ID);
-	dev_info(&p_client->dev, "%s enter\n", __func__);
+	dev_dbg(&p_client->dev, "Driver ID: %s\n", TAS2562_DRIVER_ID);
+	dev_dbg(&p_client->dev, "%s enter\n", __func__);
 
 	p_tas2562 = devm_kzalloc(&p_client->dev,
 		sizeof(struct tas2562_priv), GFP_KERNEL);
 	if (p_tas2562 == NULL) {
-		/* dev_err(&p_client->dev, "failed to get i2c device\n"); */
+		/* dev_dbg(&p_client->dev, "failed to get i2c device\n"); */
 		n_result = -ENOMEM;
 		goto err;
 	}
@@ -974,15 +974,15 @@ static int tas2562_i2c_probe(struct i2c_client *p_client,
 	p_tas2562->regmap = devm_regmap_init_i2c(p_client, &tas2562_i2c_regmap);
 	if (IS_ERR(p_tas2562->regmap)) {
 		n_result = PTR_ERR(p_tas2562->regmap);
-		dev_err(&p_client->dev, "Failed to allocate register map: %d\n",
+		dev_dbg(&p_client->dev, "Failed to allocate register map: %d\n",
 					n_result);
 		goto err;
 	} else {
-		dev_err(&p_client->dev, "Failed to allocate register p_tas2562->regmap: %x\n",p_tas2562->regmap);
+		dev_dbg(&p_client->dev, "Failed to allocate register p_tas2562->regmap: %x\n",p_tas2562->regmap);
 	}
 
 	if (p_client->dev.of_node) {
-    dev_info(&p_client->dev, "Before tas2562_parse_dt\n");
+    dev_dbg(&p_client->dev, "Before tas2562_parse_dt\n");
 		tas2562_parse_dt(&p_client->dev, p_tas2562);
 		
         }
@@ -990,7 +990,7 @@ static int tas2562_i2c_probe(struct i2c_client *p_client,
 		n_result = gpio_request(p_tas2562->mn_reset_gpio,
 			"TAS2562_RESET");
 		if (n_result) {
-			dev_err(p_tas2562->dev, "%s: Failed to request gpio %d\n",
+			dev_dbg(p_tas2562->dev, "%s: Failed to request gpio %d\n",
 				__func__, p_tas2562->mn_reset_gpio);
 			n_result = -EINVAL;
 			goto err_gpio;
@@ -1004,7 +1004,7 @@ static int tas2562_i2c_probe(struct i2c_client *p_client,
 		n_result = gpio_request(p_tas2562->mn_reset_gpio2,
 			"TAS2562_RESET2");
 		if (n_result) {
-			dev_err(p_tas2562->dev, "%s: Failed to request gpio %d\n",
+			dev_dbg(p_tas2562->dev, "%s: Failed to request gpio %d\n",
 				__func__, p_tas2562->mn_reset_gpio2);
 			n_result = -EINVAL;
 			goto err;
@@ -1029,20 +1029,20 @@ static int tas2562_i2c_probe(struct i2c_client *p_client,
 
 	mutex_init(&p_tas2562->dev_lock);
 
-	dev_info(&p_client->dev, "Before SW reset\n");
+	dev_dbg(&p_client->dev, "Before SW reset\n");
 	/* Reset the chip */
 	n_result = tas2562_dev_write(p_tas2562, channel_both,
 			TAS2562_SOFTWARERESET, 0x01);
 	if (n_result < 0) {
-		dev_err(&p_client->dev, "I2c fail, %d\n", n_result);
+		dev_dbg(&p_client->dev, "I2c fail, %d\n", n_result);
 		goto err_i2c;
 	}
-	dev_info(&p_client->dev, "After SW reset\n");
+	dev_dbg(&p_client->dev, "After SW reset\n");
 
 	if (gpio_is_valid(p_tas2562->mn_irq_gpio)) {
 		n_result = gpio_request(p_tas2562->mn_irq_gpio, "TAS2562-IRQ");
 		if (n_result < 0) {
-			dev_err(p_tas2562->dev, "%s: GPIO %d request error\n",
+			dev_dbg(p_tas2562->dev, "%s: GPIO %d request error\n",
 				__func__, p_tas2562->mn_irq_gpio);
 			goto err;
 		}
@@ -1051,14 +1051,14 @@ static int tas2562_i2c_probe(struct i2c_client *p_client,
 			TAS2562_MISCCONFIGURATIONREG0, 0xce);
 
 		p_tas2562->mn_irq = gpio_to_irq(p_tas2562->mn_irq_gpio);
-		dev_info(p_tas2562->dev, "irq = %d\n", p_tas2562->mn_irq);
+		dev_dbg(p_tas2562->dev, "irq = %d\n", p_tas2562->mn_irq);
 		INIT_DELAYED_WORK(&p_tas2562->irq_work, irq_work_routine);
 		n_result = request_threaded_irq(p_tas2562->mn_irq,
 				NULL,
 				tas2562_irq_handler, IRQF_TRIGGER_FALLING|IRQF_ONESHOT,
 				p_client->name, p_tas2562);
 		if (n_result < 0) {
-			dev_err(p_tas2562->dev,
+			dev_dbg(p_tas2562->dev,
 				"request_irq failed, %d\n", n_result);
 			goto err;
 		}
@@ -1069,7 +1069,7 @@ static int tas2562_i2c_probe(struct i2c_client *p_client,
 		n_result = gpio_request(p_tas2562->mn_irq_gpio2,
 				"TAS2562-IRQ2");
 		if (n_result < 0) {
-			dev_err(p_tas2562->dev, "%s: GPIO %d request error\n",
+			dev_dbg(p_tas2562->dev, "%s: GPIO %d request error\n",
 				__func__, p_tas2562->mn_irq_gpio2);
 			goto err;
 		}
@@ -1078,14 +1078,14 @@ static int tas2562_i2c_probe(struct i2c_client *p_client,
 				TAS2562_MISCCONFIGURATIONREG0, 0xce);
 
 		p_tas2562->mn_irq2 = gpio_to_irq(p_tas2562->mn_irq_gpio2);
-		dev_info(p_tas2562->dev, "irq = %d\n", p_tas2562->mn_irq2);
+		dev_dbg(p_tas2562->dev, "irq = %d\n", p_tas2562->mn_irq2);
 		INIT_DELAYED_WORK(&p_tas2562->irq_work, irq_work_routine);
 		n_result = request_threaded_irq(p_tas2562->mn_irq2,
 				NULL,
 				tas2562_irq_handler, IRQF_TRIGGER_FALLING|IRQF_ONESHOT,
 				p_client->name, p_tas2562);
 		if (n_result < 0) {
-			dev_err(p_tas2562->dev,
+			dev_dbg(p_tas2562->dev,
 				"request_irq failed, %d\n", n_result);
 			goto err;
 		}
@@ -1098,7 +1098,7 @@ static int tas2562_i2c_probe(struct i2c_client *p_client,
 	mutex_init(&p_tas2562->codec_lock);
 	n_result = tas2562_register_codec(p_tas2562);
 	if (n_result < 0) {
-		dev_err(p_tas2562->dev,
+		dev_dbg(p_tas2562->dev,
 			"register codec failed, %d\n", n_result);
 		goto err;
 	}
@@ -1108,7 +1108,7 @@ static int tas2562_i2c_probe(struct i2c_client *p_client,
 	mutex_init(&p_tas2562->file_lock);
 	n_result = tas2562_register_misc(p_tas2562);
 	if (n_result < 0) {
-		dev_err(p_tas2562->dev,
+		dev_dbg(p_tas2562->dev,
 			"register codec failed, %d\n", n_result);
 		goto err;
 	}
@@ -1139,7 +1139,7 @@ static int tas2562_i2c_remove(struct i2c_client *p_client)
 {
 	struct tas2562_priv *p_tas2562 = i2c_get_clientdata(p_client);
 
-	dev_info(p_tas2562->dev, "%s\n", __func__);
+	dev_dbg(p_tas2562->dev, "%s\n", __func__);
 
 #ifdef CONFIG_TAS2562_CODEC
 	tas2562_deregister_codec(p_tas2562);
