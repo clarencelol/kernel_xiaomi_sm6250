@@ -92,7 +92,6 @@ CDEFINES +=	-DANI_LITTLE_BYTE_ENDIAN \
 		-DANI_OS_TYPE_ANDROID=6 \
 		-DPTT_SOCK_SVC_ENABLE \
 		-Wall\
-		-Werror\
 		-D__linux__
 
 KBUILD_CPPFLAGS += $(CDEFINES)
@@ -129,8 +128,3 @@ endif
 # Module information used by KBuild framework
 obj-$(CONFIG_SND_SOC_TAS2562) += tas2562_dlkm.o
 tas2562_dlkm-y := $(TAS2562_OBJS)
-
-
-
-# inject some build related information
-DEFINES += -DBUILD_TIMESTAMP=\"$(shell date -u +'%Y-%m-%dT%H:%M:%SZ')\"
