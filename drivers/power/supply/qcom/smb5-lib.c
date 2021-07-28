@@ -1377,10 +1377,9 @@ static const struct apsd_result *smblib_update_usb_type(struct smb_charger *chg)
 	/* if PD is active, APSD is disabled so won't have a valid result */
 	if (chg->pd_active) {
 		chg->real_charger_type = POWER_SUPPLY_TYPE_USB_PD;
-		chg->usb_psy_desc.type = POWER_SUPPLY_TYPE_USB_PD;
+		//chg->usb_psy_desc.type = POWER_SUPPLY_TYPE_USB_PD;
 	} else if (chg->qc3p5_detected) {
 		chg->real_charger_type = POWER_SUPPLY_TYPE_USB_HVDCP_3P5;
-		chg->usb_psy_desc.type = POWER_SUPPLY_TYPE_USB_HVDCP_3P5;
 	} else {
 		/*
 		 * Update real charger type only if its not FLOAT
@@ -1391,7 +1390,7 @@ static const struct apsd_result *smblib_update_usb_type(struct smb_charger *chg)
 			(apsd_result->pst != POWER_SUPPLY_TYPE_USB_HVDCP_3 ||
 			chg->qc3p5_auth_complete)) {
 			chg->real_charger_type = apsd_result->pst;
-			chg->usb_psy_desc.type = apsd_result->pst;
+			//chg->usb_psy_desc.type = apsd_result->pst;
 		}
 	}
 
@@ -6166,6 +6165,7 @@ void smblib_usb_plugin_hard_reset_locked(struct smb_charger *chg)
 		}
 
 		cancel_delayed_work_sync(&chg->charger_type_recheck);
+		chg->hvdcp_recheck_status = false;
 		chg->recheck_charger = false;
 		chg->precheck_charger_type = POWER_SUPPLY_TYPE_UNKNOWN;
 		if (chg->cc_un_compliant_detected) {
@@ -6297,6 +6297,7 @@ void smblib_usb_plugin_locked(struct smb_charger *chg)
 			chg->cc_un_compliant_detected = false;
 		}
 
+		chg->hvdcp_recheck_status = false;
 		chg->recheck_charger = false;
 		chg->precheck_charger_type = POWER_SUPPLY_TYPE_UNKNOWN;
 
@@ -6304,6 +6305,9 @@ void smblib_usb_plugin_locked(struct smb_charger *chg)
 		vote(chg->awake_votable, CHG_AWAKE_VOTER, false, 0);
 
 		smblib_update_usb_type(chg);
+		if (chg->use_extcon)
+			smblib_notify_device_mode(chg, false);
+		vote(chg->usb_icl_votable, USB_PSY_VOTER, false, 0); //remove USB_PSY voting when plugin detach
 	}
 
 	if (chg->connector_type == POWER_SUPPLY_CONNECTOR_MICRO_USB)
@@ -6711,12 +6715,17 @@ int smblib_get_quick_charge_type(struct smb_charger *chg)
 		return 0;
 
 	/* J6A do not need to report this type */
-	if ((chg->real_charger_type == POWER_SUPPLY_TYPE_USB_PD)
-					&& chg->pd_verifed) {
+	if (((chg->real_charger_type == POWER_SUPPLY_TYPE_USB_PD) && chg->pd_verifed) ||
+		(chg->real_charger_type == POWER_SUPPLY_TYPE_USB_HVDCP_3P5)) {
 		return QUICK_CHARGE_TURBE;
 	}
-	if ((chg->is_qc_class_b) || (chg->real_charger_type == POWER_SUPPLY_TYPE_USB_HVDCP_3P5))
+
+	if ((chg->is_qc_class_b) || ((chg->real_charger_type == POWER_SUPPLY_TYPE_USB_PD) && !chg->pd_verifed) ||
+		(chg->real_charger_type == POWER_SUPPLY_TYPE_USB_HVDCP_3))
 		return QUICK_CHARGE_FLASH;
+
+	if ((chg->real_charger_type == POWER_SUPPLY_TYPE_USB_DCP) && chg->hvdcp_recheck_status)
+		return QUICK_CHARGE_FAST;
 
 	while (adapter_cap[i].adap_type != 0) {
 		if (chg->real_charger_type == adapter_cap[i].adap_type) {
@@ -6773,6 +6782,11 @@ static void smblib_handle_hvdcp_3p0_auth_done(struct smb_charger *chg,
 
 	/* the APSD done handler will set the USB supply type */
 	apsd_result = smblib_get_apsd_result(chg);
+
+	if (apsd_result->pst == POWER_SUPPLY_TYPE_USB_HVDCP_3P5 && chg->support_ffc) {
+		if(!smblib_get_fastcharge_mode(chg))
+			smblib_set_fastcharge_mode(chg, true);
+	}
 
 	/* for QC3, switch to CP if present */
 	if ((apsd_result->bit & QC_3P0_BIT)
@@ -9257,7 +9271,8 @@ static void smblib_charger_type_recheck(struct work_struct *work)
 		rc = smblib_request_dpdm(chg, false);
 		if (rc < 0)
 			smblib_err(chg, "Couldn't disable DPDM rc=%d\n", rc);
-
+		if ( chg->real_charger_type == POWER_SUPPLY_TYPE_USB_FLOAT)
+			chg->is_float_recheck = true;
 		msleep(500);
 	}
 
