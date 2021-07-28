@@ -797,6 +797,8 @@ struct smb_charger {
 	int			chg_term_current_thresh_hi_from_dts;
 	bool			support_ffc;
 	bool			already_start_step_charge_work;
+	bool			hvdcp_recheck_status;
+	bool   is_float_recheck;
 };
 
 enum quick_charge_type {
