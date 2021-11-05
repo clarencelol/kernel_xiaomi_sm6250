@@ -406,7 +406,7 @@ static void aw8624_container_update(struct aw8624 *aw8624,
 
 	mutex_unlock(&aw8624->lock);
 
-	pr_info("%s exit\n", __func__);
+	pr_debug("%s exit\n", __func__);
 }
 
 static void aw8624_ram_loaded(const struct firmware *cont, void *context)
@@ -1074,7 +1074,7 @@ static int aw8624_haptic_rtp_init(struct aw8624 *aw8624)
 		aw8624_haptic_set_rtp_aei(aw8624, true);
 	}
 
-	pr_info("%s exit\n", __func__);
+	pr_debug("%s exit\n", __func__);
 	pm_qos_remove_request(&pm_qos_req_vb);
 	return 0;
 }
@@ -1363,7 +1363,7 @@ static int aw8624_rtp_osc_calibration(struct aw8624 *aw8624)
 	    (aw8624->end.tv_usec - aw8624->start.tv_usec);
 	/*calibration osc */
 	pr_info("%s 2018_microsecond:%ld \n", __func__, aw8624->microsecond);
-	pr_info("%s exit\n", __func__);
+	pr_debug("%s exit\n", __func__);
 	return 0;
 }
 
