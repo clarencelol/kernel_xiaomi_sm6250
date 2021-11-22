@@ -1659,7 +1659,7 @@ static int smb5_usb_main_set_prop(struct power_supply *psy,
 	struct smb5 *chip = power_supply_get_drvdata(psy);
 	struct smb_charger *chg = &chip->chg;
 	union power_supply_propval pval = {0, };
-	enum power_supply_type real_chg_type = chg->real_charger_type;
+	enum power_supply_type __maybe_unused real_chg_type = chg->real_charger_type;
 	int parallel_output_mode = 0;
 	int rc = 0, offset_ua = 0;
 
