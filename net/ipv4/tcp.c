@@ -2831,6 +2831,22 @@ static int do_tcp_setsockopt(struct sock *sk, int level,
 		break;
 	}
 
+	// case TCP_NODELAY:
+	if (val) {
+		/* TCP_NODELAY is weaker than TCP_CORK, so that
+		 * this option on corked socket is remembered, but
+		 * it is not activated until cork is cleared.
+		 *
+		 * However, when TCP_NODELAY is set we make
+		 * an explicit push, which overrides even TCP_CORK
+		 * for currently queued segments.
+		 */
+		tp->nonagle |= TCP_NAGLE_OFF|TCP_NAGLE_PUSH;
+		tcp_push_pending_frames(sk);
+	} else {
+		tp->nonagle &= ~TCP_NAGLE_OFF;
+	}
+
 	release_sock(sk);
 	return err;
 }
