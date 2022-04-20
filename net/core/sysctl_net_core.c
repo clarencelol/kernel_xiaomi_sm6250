@@ -361,7 +361,7 @@ static struct ctl_table net_core_table[] = {
 		.procname	= "netdev_max_backlog",
 		.data		= &netdev_max_backlog,
 		.maxlen		= sizeof(int),
-		.mode		= 0644,
+		.mode		= 0444,
 		.proc_handler	= proc_dointvec
 	},
 	{
@@ -506,7 +506,7 @@ static struct ctl_table net_core_table[] = {
 		.procname	= "netdev_budget",
 		.data		= &netdev_budget,
 		.maxlen		= sizeof(int),
-		.mode		= 0644,
+		.mode		= 0444,
 		.proc_handler	= proc_dointvec
 	},
 	{
