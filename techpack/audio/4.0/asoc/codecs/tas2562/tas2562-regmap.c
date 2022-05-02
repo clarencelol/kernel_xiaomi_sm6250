@@ -1054,8 +1054,8 @@ static int tas2562_i2c_probe(struct i2c_client *p_client,
 		dev_info(p_tas2562->dev, "irq = %d\n", p_tas2562->mn_irq);
 		INIT_DELAYED_WORK(&p_tas2562->irq_work, irq_work_routine);
 		n_result = request_threaded_irq(p_tas2562->mn_irq,
-				tas2562_irq_handler,
-				NULL, IRQF_TRIGGER_FALLING|IRQF_ONESHOT,
+				NULL,
+				tas2562_irq_handler, IRQF_TRIGGER_FALLING|IRQF_ONESHOT,
 				p_client->name, p_tas2562);
 		if (n_result < 0) {
 			dev_err(p_tas2562->dev,
@@ -1081,8 +1081,8 @@ static int tas2562_i2c_probe(struct i2c_client *p_client,
 		dev_info(p_tas2562->dev, "irq = %d\n", p_tas2562->mn_irq2);
 		INIT_DELAYED_WORK(&p_tas2562->irq_work, irq_work_routine);
 		n_result = request_threaded_irq(p_tas2562->mn_irq2,
-				tas2562_irq_handler,
-				NULL, IRQF_TRIGGER_FALLING|IRQF_ONESHOT,
+				NULL,
+				tas2562_irq_handler, IRQF_TRIGGER_FALLING|IRQF_ONESHOT,
 				p_client->name, p_tas2562);
 		if (n_result < 0) {
 			dev_err(p_tas2562->dev,
