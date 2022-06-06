@@ -377,7 +377,7 @@
 		clock-names = "gcc_iface", "iface_clk", "rot_clk";
 
 		interrupt-parent = <&mdss_mdp>;
-		interrupts = <2 0>;
+		interrupts = <2>;
 
 		power-domains = <&mdss_mdp>;
 
@@ -423,7 +423,7 @@
 			<0xaf08000 0x4>;
 		reg-names = "dsi_ctrl", "disp_cc_base";
 		interrupt-parent = <&mdss_mdp>;
-		interrupts = <4 0>;
+		interrupts = <4>;
 		vdda-1p2-supply = <&L3C>;
 		refgen-supply = <&refgen>;
 		clocks = <&clock_dispcc DISP_CC_MDSS_BYTE0_CLK>,
@@ -530,7 +530,7 @@
 				"usb3_dp_com", "hdcp_physical", "dp_p1";
 
 		interrupt-parent = <&mdss_mdp>;
-		interrupts = <12 0>;
+		interrupts = <12>;
 
 		qcom,aux-cfg0-settings = [20 00];
 		qcom,aux-cfg1-settings = [24 13 23 1d];
