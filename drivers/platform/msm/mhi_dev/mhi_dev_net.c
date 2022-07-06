@@ -811,13 +811,12 @@ channel_init_fail:
 }
 EXPORT_SYMBOL(mhi_dev_net_interface_init);
 
-void __exit mhi_dev_net_exit(void)
+static void __exit mhi_dev_net_exit(void)
 {
 	mhi_dev_net_log(MHI_INFO,
 			"MHI Network Interface Module exited\n");
 	mhi_dev_net_close();
 }
-EXPORT_SYMBOL(mhi_dev_net_exit);
 
 static int mhi_dev_net_probe(struct platform_device *pdev)
 {
