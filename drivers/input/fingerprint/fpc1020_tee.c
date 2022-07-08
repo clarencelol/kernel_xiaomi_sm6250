@@ -545,11 +545,7 @@ static irqreturn_t fpc1020_irq_handler(int irq, void *handle)
 
 	dev_dbg(fpc1020->dev, "%s\n", __func__);
 
-	if (atomic_read(&fpc1020->wakeup_enabled)) {
-		//wake_lock_timeout(&fpc1020->ttw_wl,
-		//			msecs_to_jiffies(FPC_TTW_HOLD_TIME));
-		__pm_wakeup_event(&fpc1020->ttw_ws, FPC_TTW_HOLD_TIME);//for kernel 4.9
-	}
+	__pm_wakeup_event(&fpc1020->ttw_ws, FPC_TTW_HOLD_TIME);
 
 	sysfs_notify(&fpc1020->dev->kobj, NULL, dev_attr_irq.attr.name);
 	return IRQ_HANDLED;
