@@ -10,7 +10,7 @@
 		reg = <0>;
 
 		/* SPI configuration */
-		spi-max-frequency = <8000000>;
+		spi-max-frequency = <10000000>;
 
 		/* Regulator configuration */
 		touch_vddio-supply = <&L18A>;
