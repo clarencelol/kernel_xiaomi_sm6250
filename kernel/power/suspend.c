@@ -16,7 +16,6 @@
 #include <linux/init.h>
 #include <linux/console.h>
 #include <linux/cpu.h>
-#include <linux/cpuidle.h>
 #include <linux/syscalls.h>
 #include <linux/gfp.h>
 #include <linux/io.h>
@@ -88,7 +87,6 @@ static void s2idle_enter(void)
 	raw_spin_unlock_irq(&s2idle_lock);
 
 	get_online_cpus();
-	cpuidle_resume();
 
 	/* Push all the CPUs into the idle loop. */
 	wake_up_all_idle_cpus();
@@ -96,7 +94,6 @@ static void s2idle_enter(void)
 	wait_event(s2idle_wait_head,
 		   s2idle_state == S2IDLE_STATE_WAKE);
 
-	cpuidle_pause();
 	put_online_cpus();
 
 	raw_spin_lock_irq(&s2idle_lock);
