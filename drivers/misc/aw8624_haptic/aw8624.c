@@ -4159,8 +4159,9 @@ err_id:
 	if (gpio_is_valid(aw8624->irq_gpio))
 		devm_gpio_free(&i2c->dev, aw8624->irq_gpio);
 err_irq_gpio_request:
-	if (gpio_is_valid(aw8624->reset_gpio))
-		devm_gpio_free(&i2c->dev, aw8624->reset_gpio);
+	if (!aw8624->enable_pin_control)
+		if (gpio_is_valid(aw8624->reset_gpio))
+			devm_gpio_free(&i2c->dev, aw8624->reset_gpio);
 err_reset_gpio_request:
 err_parse_dt:
 	device_init_wakeup(aw8624->dev, false);
