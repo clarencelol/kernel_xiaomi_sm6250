@@ -20,7 +20,7 @@
 
 #ifndef __ASSEMBLER__
 
-#define __LL_SC_INLINE		static inline
+#define __LL_SC_INLINE		static __always_inline
 #define __LL_SC_PREFIX(x)	x
 #define __LL_SC_EXPORT(x)
 
