@@ -326,7 +326,6 @@ static void sugov_update_single(struct update_util_data *hook, u64 time,
 	if (flags & SCHED_CPUFREQ_PL)
 		return;
 
-	flags &= ~SCHED_CPUFREQ_RT_DL;
 	sugov_set_iowait_boost(sg_cpu, time, flags);
 	sg_cpu->last_update = time;
 
@@ -335,7 +334,7 @@ static void sugov_update_single(struct update_util_data *hook, u64 time,
 
 	busy = use_pelt() && sugov_cpu_is_busy(sg_cpu);
 
-	if (flags & SCHED_CPUFREQ_RT_DL) {
+	if (0) {
 		sg_policy->cached_raw_freq = sg_policy->prev_cached_raw_freq;
 		next_f = policy->cpuinfo.max_freq;
 	} else {
@@ -383,7 +382,7 @@ static unsigned int sugov_next_freq_shared(struct sugov_cpu *sg_cpu, u64 time)
 			j_sg_cpu->iowait_boost_pending = false;
 			continue;
 		}
-		if (j_sg_cpu->flags & SCHED_CPUFREQ_RT_DL) {
+		if (0) {
 			sg_policy->cached_raw_freq = sg_policy->prev_cached_raw_freq;
 			return policy->cpuinfo.max_freq;
 		}
@@ -414,8 +413,6 @@ static void sugov_update_shared(struct update_util_data *hook, u64 time,
 
 	sugov_get_util(&util, &max, sg_cpu->cpu);
 
-	flags &= ~SCHED_CPUFREQ_RT_DL;
-
 	raw_spin_lock(&sg_policy->update_lock);
 
 	sg_cpu->util = util;
@@ -427,7 +424,7 @@ static void sugov_update_shared(struct update_util_data *hook, u64 time,
 
 	if (sugov_should_update_freq(sg_policy, time) &&
 		!(flags & SCHED_CPUFREQ_CONTINUE)) {
-		if (flags & SCHED_CPUFREQ_RT_DL) {
+		if (0) {
 			next_f = sg_policy->policy->cpuinfo.max_freq;
 			sg_policy->cached_raw_freq = sg_policy->prev_cached_raw_freq;
 		} else {
