@@ -38,6 +38,9 @@ CFLAGS_sys_ni.o = $(DISABLE_LTO)
 # Don't instrument error handlers
 CFLAGS_cfi.o = $(DISABLE_CFI_CLANG)
 
+# Shush
+CFLAGS_smp.o = $(call cc-disable-warning, align-mismatch)
+
 obj-y += sched/
 obj-y += locking/
 obj-y += power/
