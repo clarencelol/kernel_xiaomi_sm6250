@@ -2509,7 +2509,7 @@ out:
  */
 #define MIN_NR_GENS	2
 
-#define MAX_BATCH_SIZE	8192
+#define MAX_BATCH_SIZE	4096
 
 /******************************************************************************
  *                          shorthand helpers
@@ -3389,7 +3389,7 @@ restart:
 
 		walk_pmd_range(&val, addr, next, walk);
 
-		if (args->batch_size >= MAX_BATCH_SIZE) {
+		if (need_resched() || args->batch_size >= MAX_BATCH_SIZE) {
 			end = (addr | ~PUD_MASK) + 1;
 			goto done;
 		}
@@ -3648,7 +3648,7 @@ static bool walk_mm_list(struct lruvec *lruvec, unsigned long max_seq,
 
 	if (!last) {
 		/* the foreground aging prefers not to wait */
-		if (!current_is_kswapd() && sc->priority < DEF_PRIORITY - 2)
+		if (!current_is_kswapd() && sc->priority <= DEF_PRIORITY - 2)
 			wait_event_killable(mm_list->nodes[nid].wait,
 					    max_seq < READ_ONCE(lrugen->max_seq));
 
