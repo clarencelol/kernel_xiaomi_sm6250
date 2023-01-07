@@ -2700,7 +2700,7 @@ static struct lru_gen_mm_list *alloc_mm_list(void)
 	int nid;
 	struct lru_gen_mm_list *mm_list;
 
-	mm_list = kzalloc(struct_size(mm_list, nodes, nr_node_ids), GFP_KERNEL);
+	mm_list = kzalloc(sizeof(*mm_list) + nr_node_ids * sizeof(*mm_list->nodes), GFP_KERNEL);
 	if (!mm_list)
 		return NULL;
 
