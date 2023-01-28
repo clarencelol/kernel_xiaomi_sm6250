@@ -156,8 +156,6 @@ static void install_bp_hardening_cb(bp_hardening_cb_t fn,
 #endif	/* CONFIG_KVM */
 
 #include <uapi/linux/psci.h>
-#include <linux/arm-smccc.h>
-#include <linux/psci.h>
 
 static void call_smc_arch_workaround_1(void)
 {
@@ -289,42 +287,6 @@ static int __init ssbd_cfg(char *buf)
 }
 early_param("ssbd", ssbd_cfg);
 
-void __init arm64_update_smccc_conduit(struct alt_instr *alt,
-				       __le32 *origptr, __le32 *updptr,
-				       int nr_inst)
-{
-	u32 insn;
-
-	BUG_ON(nr_inst != 1);
-
-	switch (psci_ops.conduit) {
-	case PSCI_CONDUIT_HVC:
-		insn = aarch64_insn_get_hvc_value();
-		break;
-	case PSCI_CONDUIT_SMC:
-		insn = aarch64_insn_get_smc_value();
-		break;
-	default:
-		return;
-	}
-
-	*updptr = cpu_to_le32(insn);
-}
-
-void __init arm64_enable_wa2_handling(struct alt_instr *alt,
-				      __le32 *origptr, __le32 *updptr,
-				      int nr_inst)
-{
-	BUG_ON(nr_inst != 1);
-	/*
-	 * Only allow mitigation on EL1 entry/exit and guest
-	 * ARCH_WORKAROUND_2 handling if the SSBD state allows it to
-	 * be flipped.
-	 */
-	if (arm64_get_ssbd_state() == ARM64_SSBD_KERNEL)
-		*updptr = cpu_to_le32(aarch64_insn_gen_nop());
-}
-
 void arm64_set_ssbd_mitigation(bool state)
 {
 	if (!IS_ENABLED(CONFIG_ARM64_SSBD)) {
@@ -354,6 +316,31 @@ void arm64_set_ssbd_mitigation(bool state)
 		break;
 	}
 }
+
+#if defined(CONFIG_MITIGATE_SPECTRE_BRANCH_HISTORY) || \
+	defined(CONFIG_ARM64_SSBD)
+void __init arm64_update_smccc_conduit(struct alt_instr *alt,
+				       __le32 *origptr, __le32 *updptr,
+				       int nr_inst)
+{
+	u32 insn;
+
+	BUG_ON(nr_inst != 1);
+
+	switch (psci_ops.conduit) {
+	case PSCI_CONDUIT_HVC:
+		insn = aarch64_insn_get_hvc_value();
+		break;
+	case PSCI_CONDUIT_SMC:
+		insn = aarch64_insn_get_smc_value();
+		break;
+	default:
+		return;
+	}
+
+	*updptr = cpu_to_le32(insn);
+}
+#endif /* CONFIG_MITIGATE_SPECTRE_BRANCH_HISTORY || CONFIG_ARM64_SSBD */
 
 static bool has_ssbd_mitigation(const struct arm64_cpu_capabilities *entry,
 				    int scope)
