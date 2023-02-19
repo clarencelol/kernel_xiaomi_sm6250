@@ -4177,7 +4177,7 @@ static unsigned long lru_gen_shrink_lruvec(struct lruvec *lruvec, struct scan_co
  *                          the background aging
  ******************************************************************************/
 
-static int lru_gen_spread = MIN_NR_GENS;
+static int lru_gen_spread = IS_ENABLED(CONFIG_ANDROID) ? 0 : MIN_NR_GENS;
 
 static void try_walk_mm_list(struct lruvec *lruvec, struct scan_control *sc)
 {
