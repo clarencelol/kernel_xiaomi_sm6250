@@ -854,6 +854,7 @@ config NR_LRU_GENS
 	int "Max number of generations"
 	depends on LRU_GEN
 	range 4 31
+	default 4 if ANDROID
 	default 7
 	help
 	  This will use order_base_2(N+1) spare bits from page flags.
