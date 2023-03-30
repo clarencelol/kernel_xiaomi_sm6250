@@ -16,7 +16,10 @@
 
 # include "gsi.h"
 # include "gsi_reg.h"
+
+#if defined(CONFIG_IPA_EMULATION)
 # include "gsi_emulation_stubs.h"
+#endif
 
 # define gsi_emu_readl(c)     (readl(c))
 # define gsi_emu_writel(v, c) ({ __iowmb(); writel_relaxed((v), (c)); })
