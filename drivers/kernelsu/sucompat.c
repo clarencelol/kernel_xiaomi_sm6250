@@ -15,7 +15,6 @@
 #include "allowlist.h"
 #include "arch.h"
 #include "klog.h" // IWYU pragma: keep
-#include "ksud.h"
 
 #define SU_PATH "/system/bin/su"
 #define SH_PATH "/system/bin/sh"
@@ -96,7 +95,7 @@ int ksu_handle_execveat_sucompat(int *fd, struct filename **filename_ptr,
 				 void *argv, void *envp, int *flags)
 {
 	struct filename *filename;
-	const char sh[] = KSUD_PATH;
+	const char sh[] = SH_PATH;
 	const char su[] = SU_PATH;
 
 	if (!filename_ptr)
