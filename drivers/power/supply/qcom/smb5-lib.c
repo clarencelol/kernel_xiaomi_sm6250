@@ -3017,24 +3017,12 @@ int smblib_set_prop_battery_charging_enabled(struct smb_charger *chg,
 
   return 0;
 }
-extern union power_supply_propval lct_therm_lvl_reserved;
-extern bool lct_backlight_off;
-extern int LctIsInCall;
-extern int LctThermal;
 
 int smblib_set_prop_system_temp_level(struct smb_charger *chg,
 				const union power_supply_propval *val)
 {
 	int rc;
 	union power_supply_propval batt_temp ={0,};
-
-    if (board_33w_supported) {
-        LCT_THERM_CALL_LEVEL = 14;
-        LCT_THERM_LCDOFF_LEVEL = 13;
-    } else {
-        LCT_THERM_CALL_LEVEL = 7;
-        LCT_THERM_LCDOFF_LEVEL = 4;
-    }
 
 	if (val->intval < 0)
 		return -EINVAL;
@@ -3055,23 +3043,6 @@ int smblib_set_prop_system_temp_level(struct smb_charger *chg,
 					 "chg->system_temp_level:%d, charger_type:%d\n",
 					 val->intval, batt_temp.intval, chg->thermal_levels,
 					 chg->system_temp_level, chg->real_charger_type);
-
-	pr_info("%s val=%d, chg->system_temp_level=%d, LctThermal=%d, lct_backlight_off= %d, IsInCall=%d \n "
-		,__FUNCTION__,val->intval,chg->system_temp_level, LctThermal, lct_backlight_off, LctIsInCall);
-
-	if (LctThermal == 0) { //from therml-engine always store lvl_sel
-		lct_therm_lvl_reserved.intval = val->intval;
-	}
-
-	if ((lct_backlight_off) && (LctIsInCall == 0) && (val->intval > LCT_THERM_LCDOFF_LEVEL)) {
-		pr_info("leve ignored:backlight_off:%d level:%d",lct_backlight_off,val->intval);
-		return 0;
-	}
-
-	if ((LctIsInCall == 1) && (val->intval != LCT_THERM_CALL_LEVEL)) {
-		pr_info("leve ignored:LctIsInCall:%d level:%d",LctIsInCall,val->intval);
-		return 0;
-	}
 
 	if (val->intval == chg->system_temp_level)
 		return 0;
