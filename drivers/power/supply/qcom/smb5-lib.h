@@ -221,10 +221,6 @@ enum print_reason {
 
 #define CHARGER_SOC_DECIMAL_MS		200
 
-/* lct thermal */
-static int LCT_THERM_CALL_LEVEL;
-static int LCT_THERM_LCDOFF_LEVEL;
-
 enum hvdcp3_type {
 	HVDCP3_NONE = 0,
 	HVDCP3_CLASSA_18W,
@@ -769,8 +765,6 @@ struct smb_charger {
 	int			dcin_uv_count;
 	ktime_t			dcin_uv_last_time;
 	int			last_wls_vout;
-	struct notifier_block notifier;
-	struct work_struct fb_notify_work;
 
 	/* charger type recheck */
 	int			recheck_charger;
