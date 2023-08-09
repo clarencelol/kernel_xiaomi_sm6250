@@ -237,9 +237,15 @@ write_size:
 }
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 12, 0)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 3, 0)
+int exfat_getattr(struct mnt_idmap *idmap, const struct path *path,
+		  struct kstat *stat, unsigned int request_mask,
+		  unsigned int query_flags)
+#else
 int exfat_getattr(struct user_namespace *mnt_uerns, const struct path *path,
 		  struct kstat *stat, unsigned int request_mask,
 		  unsigned int query_flags)
+#endif
 #else
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 11, 0)
 int exfat_getattr(const struct path *path, struct kstat *stat,
@@ -258,7 +264,11 @@ int exfat_getattr(struct vfsmount *mnt, struct dentry *dentry,
 #endif
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 12, 0)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 3, 0)
+	generic_fillattr(&nop_mnt_idmap, inode, stat);
+#else
 	generic_fillattr(&init_user_ns, inode, stat);
+#endif
 #else
 	generic_fillattr(inode, stat);
 #endif
@@ -273,8 +283,13 @@ int exfat_getattr(struct vfsmount *mnt, struct dentry *dentry,
 }
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 12, 0)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 3, 0)
+int exfat_setattr(struct mnt_idmap *idmap, struct dentry *dentry,
+		struct iattr *attr)
+#else
 int exfat_setattr(struct user_namespace *mnt_userns, struct dentry *dentry,
 		struct iattr *attr)
+#endif
 #else
 int exfat_setattr(struct dentry *dentry, struct iattr *attr)
 #endif
@@ -304,7 +319,11 @@ int exfat_setattr(struct dentry *dentry, struct iattr *attr)
 		(LINUX_VERSION_CODE >= KERNEL_VERSION(4, 1, 37))) || \
 		(LINUX_VERSION_CODE >= KERNEL_VERSION(4, 9, 0))
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 12, 0)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 3, 0)
+	error = setattr_prepare(&nop_mnt_idmap, dentry, attr);
+#else
 	error = setattr_prepare(&init_user_ns, dentry, attr);
+#endif
 #else
 	error = setattr_prepare(dentry, attr);
 #endif
@@ -342,7 +361,11 @@ int exfat_setattr(struct dentry *dentry, struct iattr *attr)
 #endif
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 12, 0)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 3, 0)
+	setattr_copy(&nop_mnt_idmap, inode, attr);
+#else
 	setattr_copy(&init_user_ns, inode, attr);
+#endif
 #else
 	setattr_copy(inode, attr);
 #endif
@@ -460,7 +483,11 @@ const struct file_operations exfat_file_operations = {
 #endif
 	.mmap		= generic_file_mmap,
 	.fsync		= exfat_file_fsync,
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 5, 0)
+	.splice_read	= filemap_splice_read,
+#else
 	.splice_read	= generic_file_splice_read,
+#endif
 	.splice_write	= iter_file_splice_write,
 };
 
