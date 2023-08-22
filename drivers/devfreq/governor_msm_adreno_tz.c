@@ -26,10 +26,10 @@
 
 static DEFINE_SPINLOCK(tz_lock);
 /*
- * FLOOR is 5msec to capture up to 3 re-draws
+ * FLOOR is 1msec to capture up to 3 re-draws
  * per frame for 60fps content.
  */
-#define FLOOR		        5000
+#define FLOOR		        1000
 /*
  * MIN_BUSY is 1 msec for the sample to be sent
  */
