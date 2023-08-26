@@ -13,17 +13,30 @@ obj-y += kernel_compat.o
 
 obj-y += selinux/
 # .git is a text file while the module is imported by 'git submodule add'.
-ccflags-y += -DKSU_GIT_VERSION=637
-
-ifndef EXPECTED_SIZE
-EXPECTED_SIZE := 0x033b
+ifeq ($(shell test -e $(srctree)/$(src)/../.git; echo $$?),0)
+KSU_GIT_VERSION := $(shell cd $(srctree)/$(src); /usr/bin/env PATH="$$PATH":/usr/bin:/usr/local/bin git rev-list --count HEAD)
+# ksu_version: major * 10000 + git version + 200 for historical reasons
+$(eval KSU_VERSION=$(shell expr 10000 + $(KSU_GIT_VERSION) + 200))
+$(info -- KernelSU version: $(KSU_VERSION))
+ccflags-y += -DKSU_VERSION=$(KSU_VERSION)
+else # If there is no .git file, the default version will be passed.
+KSU_GIT_VERSION := 1012
+$(eval KSU_VERSION=$(shell expr 10000 + $(KSU_GIT_VERSION) + 200))
+ccflags-y += -DKSU_VERSION=$(KSU_VERSION)
 endif
 
-ifndef EXPECTED_HASH
-EXPECTED_HASH := 0xb0b91415
+ifndef KSU_EXPECTED_SIZE
+KSU_EXPECTED_SIZE := 0x033b
 endif
 
-ccflags-y += -DEXPECTED_SIZE=$(EXPECTED_SIZE)
-ccflags-y += -DEXPECTED_HASH=$(EXPECTED_HASH)
+ifndef KSU_EXPECTED_HASH
+KSU_EXPECTED_HASH := 0xb0b91415
+endif
+
+$(info -- KernelSU Manager signature size: $(KSU_EXPECTED_SIZE))
+$(info -- KernelSU Manager signature hash: $(KSU_EXPECTED_HASH))
+
+ccflags-y += -DEXPECTED_SIZE=$(KSU_EXPECTED_SIZE)
+ccflags-y += -DEXPECTED_HASH=$(KSU_EXPECTED_HASH)
 ccflags-y += -Wno-implicit-function-declaration -Wno-strict-prototypes -Wno-int-conversion -Wno-gcc-compat
 ccflags-y += -Wno-declaration-after-statement
