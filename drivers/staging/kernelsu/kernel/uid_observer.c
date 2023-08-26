@@ -29,7 +29,7 @@ static bool is_uid_exist(uid_t uid, void *data)
 
 	bool exist = false;
 	list_for_each_entry (np, list, list) {
-		if (np->uid % 100000 == uid) {
+		if (np->uid == uid % 100000) {
 			exist = true;
 			break;
 		}
@@ -39,12 +39,11 @@ static bool is_uid_exist(uid_t uid, void *data)
 
 static void do_update_uid(struct work_struct *work)
 {
-	KWORKER_INSTALL_KEYRING();
-	struct file *fp = filp_open(SYSTEM_PACKAGES_LIST_PATH, O_RDONLY, 0);
+	struct file *fp = ksu_filp_open_compat(SYSTEM_PACKAGES_LIST_PATH, O_RDONLY, 0);
 	if (IS_ERR(fp)) {
 		pr_err("do_update_uid, open " SYSTEM_PACKAGES_LIST_PATH
 		       " failed: %d\n",
-		       ERR_PTR(fp));
+		       PTR_ERR(fp));
 		return;
 	}
 
@@ -56,13 +55,15 @@ static void do_update_uid(struct work_struct *work)
 	loff_t line_start = 0;
 	char buf[128];
 	for (;;) {
-		ssize_t count = ksu_kernel_read_compat(fp, &chr, sizeof(chr), &pos);
+		ssize_t count =
+			ksu_kernel_read_compat(fp, &chr, sizeof(chr), &pos);
 		if (count != sizeof(chr))
 			break;
 		if (chr != '\n')
 			continue;
 
-		count = ksu_kernel_read_compat(fp, buf, sizeof(buf), &line_start);
+		count = ksu_kernel_read_compat(fp, buf, sizeof(buf),
+					       &line_start);
 
 		struct uid_data *data =
 			kmalloc(sizeof(struct uid_data), GFP_ATOMIC);
