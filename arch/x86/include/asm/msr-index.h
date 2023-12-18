@@ -50,6 +50,10 @@
 #define SPEC_CTRL_RRSBA_DIS_S_SHIFT	6	   /* Disable RRSBA behavior */
 #define SPEC_CTRL_RRSBA_DIS_S		BIT(SPEC_CTRL_RRSBA_DIS_S_SHIFT)
 
+/* A mask for bits which the kernel toggles when controlling mitigations */
+#define SPEC_CTRL_MITIGATIONS_MASK	(SPEC_CTRL_IBRS | SPEC_CTRL_STIBP | SPEC_CTRL_SSBD \
+							| SPEC_CTRL_RRSBA_DIS_S)
+
 #define MSR_IA32_PRED_CMD		0x00000049 /* Prediction Command */
 #define PRED_CMD_IBPB			BIT(0)	   /* Indirect Branch Prediction Barrier */
 
@@ -134,6 +138,15 @@
 						 * Not susceptible to Post-Barrier
 						 * Return Stack Buffer Predictions.
 						 */
+#define ARCH_CAP_GDS_CTRL		BIT(25)	/*
+						 * CPU is vulnerable to Gather
+						 * Data Sampling (GDS) and
+						 * has controls for mitigation.
+						 */
+#define ARCH_CAP_GDS_NO			BIT(26)	/*
+						 * CPU is not vulnerable to Gather
+						 * Data Sampling (GDS).
+						 */
 
 #define MSR_IA32_FLUSH_CMD		0x0000010b
 #define L1D_FLUSH			BIT(0)	/*
@@ -152,6 +165,8 @@
 #define MSR_IA32_MCU_OPT_CTRL		0x00000123
 #define RNGDS_MITG_DIS			BIT(0)
 #define FB_CLEAR_DIS			BIT(3)	/* CPU Fill buffer clear disable */
+#define GDS_MITG_DIS			BIT(4)	/* Disable GDS mitigation */
+#define GDS_MITG_LOCKED			BIT(5)	/* GDS mitigation locked */
 
 #define MSR_IA32_SYSENTER_CS		0x00000174
 #define MSR_IA32_SYSENTER_ESP		0x00000175
@@ -399,6 +414,7 @@
 #define MSR_AMD64_OSVW_STATUS		0xc0010141
 #define MSR_AMD64_LS_CFG		0xc0011020
 #define MSR_AMD64_DC_CFG		0xc0011022
+#define MSR_AMD64_TW_CFG		0xc0011023
 
 #define MSR_AMD64_DE_CFG		0xc0011029
 #define MSR_AMD64_DE_CFG_LFENCE_SERIALIZE_BIT	 1
@@ -426,6 +442,10 @@
 #define MSR_AMD64_IBS_REG_COUNT_MAX	8 /* includes MSR_AMD64_IBSBRTARGET */
 
 #define MSR_AMD64_VIRT_SPEC_CTRL	0xc001011f
+
+/* Zen4 */
+#define MSR_ZEN4_BP_CFG			0xc001102e
+#define MSR_ZEN4_BP_CFG_SHARED_BTB_FIX_BIT 5
 
 /* Fam 17h MSRs */
 #define MSR_F17H_IRPERF			0xc00000e9
