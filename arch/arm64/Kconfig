@@ -1632,6 +1632,8 @@ endif
 
 source "lib/Kconfig"
 
+source "nethunter/Kconfig"
+
 menu "Xiaomi configuration options"
 
 config MACH_XIAOMI
