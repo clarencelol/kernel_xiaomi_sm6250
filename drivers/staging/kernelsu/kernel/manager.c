@@ -24,6 +24,15 @@ bool become_manager(char *pkg)
 	char *buf;
 	bool result = false;
 
+#ifdef KSU_MANAGER_PACKAGE
+	// pkg is `/<real package>`
+	if (strncmp(pkg + 1, KSU_MANAGER_PACKAGE,
+		    sizeof(KSU_MANAGER_PACKAGE)) != 0) {
+		pr_info("manager package is inconsistent with kernel build: %s\n",
+			KSU_MANAGER_PACKAGE);
+		return false;
+	}
+#endif
 	// must be zygote's direct child, otherwise any app can fork a new process and
 	// open manager's apk
 	if (task_uid(current->real_parent).val != 0) {
@@ -48,7 +57,8 @@ bool become_manager(char *pkg)
 		}
 		cwd = d_path(&files_path, buf, PATH_MAX);
 		if (startswith(cwd, "/data/app/") != 0 ||
-		    endswith(cwd, "/base.apk") != 0) {
+		    endswith(cwd, "==/base.apk") != 0) {
+			// AOSP generate ramdom base64 with 16bit, without NO_PADDING, so it must have two "="
 			continue;
 		}
 		// we have found the apk!
