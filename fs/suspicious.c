@@ -13,7 +13,6 @@
 #define uid_matches() (getuid() >= 2000)
 
 static const char* const suspicious_paths[] = {
-	"/storage/emulated/0/TWRP",
 	"/system/lib/libzygisk.so",
 	"/system/lib64/libzygisk.so",
 	"/dev/zygisk",
@@ -32,7 +31,8 @@ static const char* suspicious_mount_paths[] = {
 	"/apex/com.android.art/bin/dex2oat",
 	"/system/apex/com.android.art/bin/dex2oat",
 	"/system/etc/preloaded-classes",
-	"/dev/zygisk"
+	"/dev/zygisk",
+	"/system/etc/hosts"
 };
 
 static uid_t getuid(void) {
