@@ -788,10 +788,8 @@ static ssize_t devkmsg_write(struct kiocb *iocb, struct iov_iter *from)
 		return -ENOMEM;
 
 	buf[len] = '\0';
-	if (!copy_from_iter_full(buf, len, from)) {
-		kfree(buf);
+	if (!copy_from_iter_full(buf, len, from))
 		return -EFAULT;
-	}
 
 	/*
 	 * Extract and skip the syslog prefix <[0-9]*>. Coming from userspace
@@ -804,6 +802,9 @@ static ssize_t devkmsg_write(struct kiocb *iocb, struct iov_iter *from)
 	 */
 	line = buf;
 	if (line[0] == '<') {
+		if (memcmp(line+3, "batteryd", sizeof("batteryd")-1) == 0 ||
+			   memcmp(line+3, "healthd", sizeof("healthd")-1) == 0)
+			goto ignore;
 		char *endp = NULL;
 		unsigned int u;
 
@@ -815,10 +816,13 @@ static ssize_t devkmsg_write(struct kiocb *iocb, struct iov_iter *from)
 			endp++;
 			len -= endp - line;
 			line = endp;
+			if(strncmp(line, "logd: Skipping", sizeof("logd: Skipping")))
+				goto ignore;
 		}
 	}
 
 	printk_emit(facility, level, NULL, 0, "%s", line);
+ignore:
 	kfree(buf);
 	return ret;
 }
@@ -2187,7 +2191,6 @@ void suspend_console(void)
 {
 	if (!console_suspend_enabled)
 		return;
-	printk("Suspending console(s) (use no_console_suspend to debug)\n");
 	console_lock();
 	console_suspended = 1;
 	up_console_sem();

@@ -74,6 +74,7 @@ struct bpf_map {
 	atomic_t refcnt;
 	atomic_t usercnt;
 	struct work_struct work;
+	char name[BPF_OBJ_NAME_LEN];
 };
 
 /* function argument constraints */
@@ -207,6 +208,8 @@ struct bpf_prog_aux {
 #ifdef CONFIG_SECURITY
 	void *security;
 #endif
+	u64 load_time; /* ns since boottime */
+	char name[BPF_OBJ_NAME_LEN];
 	union {
 		struct work_struct work;
 		struct rcu_head	rcu;
